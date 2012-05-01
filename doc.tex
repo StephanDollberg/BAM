@@ -1,0 +1,156 @@
+\documentclass[11pt, a4paper]{article}
+\usepackage[a4paper]{geometry}
+\usepackage{listings}
+\usepackage[usenames, dvipsnames]{color}
+\usepackage{titlesec}
+
+
+\titleformat{\section}
+{\color{DarkOrchid}\normalfont\LARGE\bfseries}
+{\color{DarkOrchid}\thesection}{1em}{}
+
+\titleformat{\subsection}
+{\color{DarkOrchid}\normalfont\Large\bfseries}
+{\color{DarkOrchid}\thesubsection}{1em}{}
+
+\titleformat{\subsubsection}
+{\color{DarkOrchid}\normalfont\bfseries}
+{\color{DarkOrchid}\thesubsubsection}{1em}{}
+
+\definecolor{SoftGray}{RGB}{244, 244,244}
+
+\lstset{ 
+  language=C++,               
+  basicstyle = \footnotesize,
+  backgroundcolor = \color{SoftGray},
+  frame=single,                   
+  breaklines=true,                
+}
+
+
+\begin{document}
+\title{\bf\color{DarkOrchid}BAM!\\
+\bf"Simplify your Parallelism"
+ }
+\author{Stephan Dollberg}
+\date{\today}
+\maketitle
+
+\section{parallel constructs}
+bam::parallel constructs offer simplistic parallel replacements for standard library algorithms like \textsc{std::for\_each}.
+\\\\All Parallel-Algorithms share a typical interface. They all take a range, a worker function and a grainsize parameter. 
+Work is split into pieces and worked on by a limited count of threads which is determined on runtime. Task stealing is performed when a thread runs out of work. When no grainsize parameter is passed, the default value is 0, which means that implementation will choose a grainsize on runtime.
+
+\subsection{parallel\_for}
+
+The interface looks like this:
+
+\begin{lstlisting} 
+template<typename ra_iter, typename worker_predicate>
+void parallel_for(ra_iter begin, ra_iter end, worker_predicate worker, int grainsize = 0)
+\end{lstlisting}
+\texttt{bam::parallel\_for} is a template which is the parallel replacement for a basic for-loop. Its use is pretty simple and straight forward, the following example should make it quite clear.
+
+\subsubsection{Example 1: }
+
+\begin{lstlisting} 
+  typedef std::vector<int> container;
+  typedef container::iterator iter;
+
+  container v = {1, 2, 3, 4, 5, 6};
+
+  auto worker = [] (iter begin, iter end) {
+    for(auto it = begin; it != end; ++it) {
+      *it = compute(*it);
+    }
+  };
+
+  bam::parallel_for(std::begin(v), std::end(v), worker);
+\end{lstlisting}
+The snippet shows how to parallelize a simple compute operation which modifies each element in a vector. All that is needed is a worker lambda which takes a range then performs \texttt{compute} on every element in that range. 
+
+\subsection{parallel\_for\_each}
+\begin{lstlisting}
+template<typename ra_iter, typename worker_predicate>
+void parallel_for_each(ra_iter begin, ra_iter end, worker_predicate worker, int grainsize = 0)
+\end{lstlisting}
+
+\texttt{bam::parallel\_for\_each} is the replacement for \texttt{std::for\_each}. It functions the very same as the original does and basically all you have to do is to replace the name. The following example shows a simple use case.
+
+\subsubsection{Example 1: Compute}
+\begin{lstlisting}
+  typedef std::vector<int> container;
+  typedef container::iterator iter;
+
+  container v = {1, 2, 3, 4, 5, 6};
+
+  auto worker = [] (int& i) { i = compute(i); };
+  bam::parallel_for_each(std::begin(v), std::end(v), worker);
+\end{lstlisting}
+
+Taking up the \texttt{bam::parallel\_for} example and making it yet even easier, we basically just wrote a typically easy \texttt{std::for\_each} function predicate and all we had to do was to replace the namespace identifier. 
+
+\subsection{parallel\_reduce}
+\texttt{bam::parallel\_reduce} is doing simple data parallel tasks but unlike bam::parallel\_for it does reduce operations and returns a value.
+\\\\The interface is definied as followed:
+\begin{lstlisting}
+template<
+typename return_type, 
+typename ra_iter, 
+typename predicate, 
+typename join_predicate, 
+>
+return_type parallel_reduce(ra_iter begin, ra_iter end, predicate worker, join_predicate join_worker, int grainsize = 0)
+
+\end{lstlisting}
+
+The interface is quite big but mighty, the following examples will explain different use-cases and the several arguments.
+
+\begin{center}
+  \begin{tabular}{ | l |  p{10cm} | }
+    \hline
+	begin,  end & begin and end form the range on which \texttt{bam::parallel\_reduce} works on \\ \hline
+	worker & worker is the predicate which takes a range and does the work on it \\  \hline
+	join\_worker & join predicate which joins the results of the two binary splitted parts \\ \hline
+	grainsize & sets the grainsize parameter for the minimal range of splitting \\ \hline
+  \end{tabular}
+\end{center}
+
+\subsubsection{Example 1: Accumulate}
+
+\begin{lstlisting}
+  typedef std::vector<int> container;
+  typedef container::iterator iter;
+
+  container v = {1, 2, 3, 4, 5, 6};
+
+  using namespace std::placeholders;
+  std::function<int(iter, iter)> accumulate_wrapper = 
+     std::bind(std::accumulate<iter, int>, _1, _2, 0);
+
+  int result = bam::parallel_reduce<int>(std::begin(v), std::end(v), accumulate_wrapper, std::plus<int>());
+
+  std::cout << result << std::endl; // prints 21
+\end{lstlisting}
+
+This example shows the very basics when using \texttt{bam::parallel\_reduce}. At first we are creating a vector whose elements we want to accumulate in parallel. Then we define a wrapper, which calls \texttt{std::accumulate} as we can't just pass \texttt{std::accumulate} to our algorithm as that one can't provide the third parameter to \texttt{std::accumulate} which is needed for type deduction. In our call to \texttt{bam::parallel\_reduce} we do explicitly name the return type as, that can't be deduced from the template arguments. We then pass our range in form of the iterators, our function to work on, the accumulate wrapper, the \texttt{std::plus<int>} functor which is the needed join function to combine the splitted parts which the different threads are handling. 
+
+\subsubsection{Example 2: Find Max}
+\begin{lstlisting}
+  typedef std::vector<int> container;
+  typedef container::iterator iter;
+
+  container v = {1, 2, 3, 4, 5, 6};
+
+  auto join_max_helper = [] (iter a, iter b) -> iter {
+      return *a > *b ? a : b;
+  };
+
+  iter result = bam::parallel_reduce<iter>(std::begin(v), std::end(v), std::max_element<iter>, join_max_helper);
+
+  std::cout << *result << std::endl; // prints 6
+\end{lstlisting}
+
+In this example we want to find the biggest element in a given range. Therefore we use the new C++11 standard function \texttt{std::max\_element} as a worker function, however this time we have to provide a custom join function which returns the iterator with the biggest associated element of the two given iterators.
+
+\end{document}
