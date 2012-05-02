@@ -8,7 +8,6 @@
 #include <vector>
 #include <memory>
 #include <future>
-#include <type_traits>
 
 #include "detail/work_range.hpp"
 #include "detail/parallel_utility.hpp"

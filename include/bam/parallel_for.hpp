@@ -10,8 +10,6 @@
 #include<memory>
 #include<iterator>
 
-
-
 #include "detail/work_range.hpp"
 #include "detail/parallel_utility.hpp"
 #include "utility.hpp"
@@ -28,7 +26,6 @@ void parallel_for(ra_iter begin, ra_iter end, worker_predicate worker, int grain
     grainsize = bam::detail::get_grainsize(end - begin, threadcount);
   }
   auto work_piece_per_thread = (end - begin) / threadcount;
-
 
   // vectors to store the threads and work per thread
   std::vector<std::unique_ptr<bam::detail::work_range<ra_iter>>> work(threadcount); // using unique_ptr to solve uncopyable stuff
