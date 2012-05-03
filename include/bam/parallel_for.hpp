@@ -29,7 +29,7 @@ void parallel_for(ra_iter begin, ra_iter end, worker_predicate worker, int grain
 
   // vectors to store the threads and work per thread
   std::vector<std::unique_ptr<bam::detail::work_range<ra_iter>>> work(threadcount); // using unique_ptr to solve uncopyable stuff
-  std::vector<std::thread> threads(threadcount);
+  std::vector<std::future<void> > threads(threadcount);
 
   // build the work for each thread
   auto counter = begin;
@@ -49,12 +49,12 @@ void parallel_for(ra_iter begin, ra_iter end, worker_predicate worker, int grain
   // spawn threads
   auto thread_id_counter = 0;
   for(auto& i : threads) {
-    i = std::thread(work_helper, thread_id_counter++);
+    i = std::async(std::launch::async, work_helper, thread_id_counter++);
   }
 
-  // join all threads
+  // rethrow exceptions
   for(auto& i : threads) {
-    i.join();
+    i.get();
   }
 }
 }

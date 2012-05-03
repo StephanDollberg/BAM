@@ -5,6 +5,7 @@
 #ifndef BAM_PARALLEL_FOR_EACH_HPP
 #define BAM_PARALLEL_FOR_EACH_HPP
 
+#include<future>
 #include<vector>
 #include<thread>
 #include<memory>
@@ -29,7 +30,7 @@ void parallel_for_each(ra_iter begin, ra_iter end, worker_predicate worker, int 
 
   // vectors to store all threads and work for each thread
   std::vector<std::unique_ptr<bam::detail::work_range<ra_iter>>> work(threadcount); // using unique_ptr to solve uncopyable stuff
-  std::vector<std::thread> threads(threadcount);
+  std::vector<std::future<void> > threads(threadcount);
 
   // build work for each thread
   auto counter = begin;
@@ -46,15 +47,15 @@ void parallel_for_each(ra_iter begin, ra_iter end, worker_predicate worker, int 
     }
   };
 
-  // spawn thread
+  // spawn threads
   auto thread_id_counter = 0;
   for(auto& i : threads) {
-    i = std::thread(work_helper, thread_id_counter++);
+    i = std::async(std::launch::async, work_helper, thread_id_counter++);
   }
 
-  // wait for threads to join
+  // rethrow exceptions
   for(auto& i : threads) {
-    i.join();
+    i.get();
   }
 }
 

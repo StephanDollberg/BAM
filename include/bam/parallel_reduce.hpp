@@ -28,8 +28,7 @@ return_type parallel_reduce(ra_iter begin, ra_iter end, worker_predicate worker,
 
   // vectors to store work, results and the threads
   std::vector<std::unique_ptr<bam::detail::work_range<ra_iter>>> work(threadcount); // using unique_ptr to solve uncopyable stuff
-  std::vector<return_type> results(threadcount);
-  std::vector<std::thread> threads(threadcount);
+  std::vector<std::future<return_type>> threads(threadcount);
 
   // initialize work
   auto counter = begin;
@@ -39,35 +38,33 @@ return_type parallel_reduce(ra_iter begin, ra_iter end, worker_predicate worker,
   work.back() = bam::make_unique<bam::detail::work_range<ra_iter>>(counter, end, grainsize);
 
   // helper function
-  auto work_helper = [&] (int thread_id) {
+  auto work_helper = [&] (int thread_id) ->return_type {
+    return_type ret;
 
-    if(work[thread_id]->work_available(work)) { // first run initializes results vector
+    if(work[thread_id]->work_available(work)) { // first run initializes ret
       auto first_work_chunk = work[thread_id]->get_chunk();
-      results[thread_id] = worker(first_work_chunk.first, first_work_chunk.second);
+      ret = worker(first_work_chunk.first, first_work_chunk.second);
     }
 
     while(work[thread_id]->work_available(work)) {
       auto work_chunk = work[thread_id]->get_chunk();
       auto result = worker(work_chunk.first, work_chunk.second);
-      results[thread_id] = joiner(results[thread_id], result);
+      ret = joiner(ret, result);
     }
+
+    return ret;
   };
 
   // spawn threads
   auto thread_id_counter = 0;
   for(auto& i : threads) {
-    i = std::thread(work_helper, thread_id_counter++);
-  }
-
-  // join threads
-  for(auto& i : threads) {
-    i.join();
+    i = std::async(std::launch::async, work_helper, thread_id_counter++);
   }
 
   // join results
-  auto result = *std::begin(results);
-  for(auto it = std::begin(results) + 1; it != std::end(results); ++it) {
-    result = joiner(result, *it);
+  auto result = std::begin(threads)->get();
+  for(auto it = std::begin(threads) + 1; it != std::end(threads); ++it) {
+    result = joiner(result, it->get());
   }
   return result;
 }
