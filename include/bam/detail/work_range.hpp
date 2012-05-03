@@ -29,6 +29,7 @@ public:
       return ret;
     }
   }
+
   bool work_available(const std::vector<std::unique_ptr<bam::detail::work_range<ra_iter>>>& steal_pool) {
     if(!work_done() || work_stealable(steal_pool)) {
       return true;
@@ -54,6 +55,7 @@ private:
       return false;
     }
   }
+
   bool work_stealable(const std::vector<std::unique_ptr<bam::detail::work_range<ra_iter>>>& steal_pool) {
     for(auto it = std::begin(steal_pool); it != std::end(steal_pool); ++it) {
       if(this != it->get()) {
