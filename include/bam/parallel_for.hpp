@@ -6,9 +6,9 @@
 #define BAM_PARALLEL_FOR_H
 
 #include<vector>
-#include<thread>
 #include<memory>
 #include<iterator>
+#include<future>
 
 #include "detail/work_range.hpp"
 #include "detail/parallel_utility.hpp"

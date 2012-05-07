@@ -2,6 +2,7 @@
 // Software License, Version 1.0. (See accompanying file
 // LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
+// work_range, underlaying "scheduler" for all parallel_ constructs
 
 #ifndef BAM_WORK_RANGE_H
 #define BAM_WORK_RANGE_H
@@ -15,7 +16,6 @@ template<typename ra_iter>
 class work_range {
 public:
   work_range(ra_iter begin_, ra_iter end_, unsigned grainsize_) : iter(begin_), end(end_), grainsize(grainsize_)  {}
-  work_range(work_range&&) = default;
 
   std::pair<ra_iter, ra_iter> get_chunk() {
     std::lock_guard<std::mutex> lock(m, std::adopt_lock); // get_chunck() always requires a call to work_available() first

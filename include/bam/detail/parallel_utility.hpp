@@ -5,6 +5,8 @@
 #ifndef BAM_PARALLEL_UTILITY_HPP
 #define BAM_PARALLEL_UTILITY_HPP
 
+#include <thread>
+
 namespace bam { namespace detail {
 
 template<typename distance>
@@ -19,7 +21,7 @@ int get_grainsize(distance range_size, int threadcount) {
     return 1;
 }
 
-int get_threadcount() {
+inline int get_threadcount() {
   int physicalthreads = std::thread::hardware_concurrency();
   int threadcount =  physicalthreads ? physicalthreads * 2 : 16; // small oversubscription
 
