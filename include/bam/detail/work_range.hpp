@@ -20,12 +20,12 @@ public:
   std::pair<ra_iter, ra_iter> get_chunk() {
     std::lock_guard<std::mutex> lock(m, std::adopt_lock); // get_chunck() always requires a call to work_available() first
     if(iter < end - grainsize) {
-      auto ret = std::pair<ra_iter, ra_iter>(iter, iter + grainsize);
+      auto ret = std::make_pair(iter, iter + grainsize);
       iter += grainsize;
       return ret;
     }
     else {      
-      auto ret = std::pair<ra_iter, ra_iter>(iter, end);
+      auto ret = std::make_pair(iter, end);
       iter = end;
       return ret;
     }
@@ -41,10 +41,12 @@ public:
   }
 
 private:
+  mutable std::mutex m;
   ra_iter iter;
   ra_iter end;
   const int grainsize;
-  mutable std::mutex m;
+
+
 
   bool work_done() const {
     m.lock();
