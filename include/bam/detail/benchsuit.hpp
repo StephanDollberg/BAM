@@ -18,7 +18,7 @@ class benchsuit {
 public:
 
   template<typename function, typename... Args>
-  void add(std::string desc, function&& foo, Args... args) {
+  void add(std::string desc, function&& foo, Args&&... args) {
     auto new_task = std::bind(std::forward<function>(foo), std::forward<Args>(args)...);
     functions.push_back(std::make_pair(desc, std::move(new_task)));
   }
