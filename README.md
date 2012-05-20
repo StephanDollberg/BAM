@@ -1,15 +1,15 @@
 #What is BAM?
 
-BAM is a small library which offers parallel algortihms like parallel_for or parallel_reduce.
+BAM is a small library which offers parallel constructs like parallel_for, parallel_reduce or a task-pool.
+It is thought to simplify multithreading and act as a lightweight alternative to TBB/(PPL). 
 
-It is thought as a lightweight alternative to TBB/(PPL). In addition it serves me to store code I frequently use and to learn all the multithreading features C++11 offers.
+In addition it serves me to store code I frequently use and to learn all the multithreading features C++11 offers.
 
 #What do I need?
 
 BAM is a header only library, all you need is the include directory and a recent compiler, like GCC 4.6.
 
 You can use the library by either dropping the include folder directly into your project tree or by including it from your compile options.
-
 On compiling you have to use both the -std=c++0x and -pthread option.
 
 #Tests
