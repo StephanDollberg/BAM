@@ -47,7 +47,6 @@ private:
   const int grainsize;
 
 
-
   bool work_done() const {
     m.lock();
     if(iter == end) {
@@ -59,6 +58,7 @@ private:
     }
   }
 
+  // steal work from work_ranges in steal_pool
   bool work_stealable(const std::vector<std::unique_ptr<bam::detail::work_range<ra_iter>>>& steal_pool) {
     for(auto it = std::begin(steal_pool); it != std::end(steal_pool); ++it) {
       if(this != it->get()) {
@@ -72,7 +72,7 @@ private:
           end = (*it)->end;
 
           (*it)->end = (*it)->iter + remaining_work / 2;
-          lk1.release();
+          lk1.release(); // keep this->m locked for work_range::get_chunk
           return true;
         }
       }
