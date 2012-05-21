@@ -4,11 +4,11 @@
 #include "catch.hpp"
 
 
-#include <bam/parallel_for_each.hpp>
-#include <bam/parallel_for.hpp>
-#include <bam/parallel_reduce.hpp>
-#include <bam/task_pool.hpp>
-#include <bam/timer.hpp>
+#include "../include/bam/parallel_for_each.hpp"
+#include "../include/bam/parallel_for.hpp"
+#include "../include/bam/parallel_reduce.hpp"
+#include "../include/bam/task_pool.hpp"
+#include "../include/bam/timer.hpp"
 
 #include <vector>
 #include <algorithm>
