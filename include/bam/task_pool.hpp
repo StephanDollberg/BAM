@@ -25,14 +25,12 @@ public:
       }
     } catch (const std::system_error& err) {
       done = true;
+      throw;
     }
   }
 
   ~task_pool() {
     done = true;
-
-    for(auto& i : threads)
-      i.get();
   }
 
   // add task that takes no args
@@ -75,6 +73,7 @@ public:
         i = std::async(std::launch::async, &task_pool::worker, this, thread_id_counter++);
     } catch (const std::system_error& err) {
       done = true;
+      throw;
     }
 
   }
