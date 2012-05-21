@@ -153,6 +153,73 @@ This example shows the very basics when using \texttt{bam::parallel\_reduce}. At
 
 In this example we want to find the biggest element in a given range. Therefore we use the new C++11 standard function \texttt{std::max\_element} as a worker function, however this time we have to provide a custom join function which returns the iterator with the biggest associated element of the two given iterators.
 
+\section{Task Pool}
+\subsection{Task Pool}
+
+The Task Pool class is - in the classical sense - a threadpool. You can add tasks which will be added to the internal queue of the taskpool. It will decide on runtime how many threads will run and work on the tasks. \\\\
+The class offers the following interface:\\
+
+\begin{lstlisting}
+
+  task_pool();
+
+  template<typename function>
+  std::future<typename std::result_of<function()>::type> add(function&& f);
+
+  template<typename function, typename ...Args>
+  std::future<typename std::result_of<function(Args...)>::type> add(function&& f, Args&& ...args);
+
+  void wait();
+
+\end{lstlisting}
+
+The following examples will make the use pretty clear:
+
+\subsubsection{Example 1: Run a simple task}
+
+\begin{lstlisting}
+  bam::task_pool pool;
+
+  pool.add([] () { std::cout << "Hello from a task pool!" << std::endl; });
+
+\end{lstlisting}
+
+We simply create a \texttt{task\_pool} to which we add a function which prints a string to the output. One important thing to note is that the taskpool is busy waiting which means that if you don't need it, you should limit its scope, to prevent it from keeping your CPU wasting cycles.
+
+\subsubsection{Example 2: Run a task with arguments}
+\begin{lstlisting}
+  bam::task_pool pool;
+
+  pool.add([] (int x) { std::cout << "The argument was " << x << std::endl;}, 42);
+\end{lstlisting}
+This time we run a function which takes an argument. The interface for \texttt{bam::task\_pool::add} is basically the standard interface for functions which take a predicate and arguments for that. 
+
+\subsubsection{Example 3: Wait for the pool to finish}
+\begin{lstlisting}
+  bam::task_pool pool;
+  for(auto i = 0; i != 100; ++i) {
+    pool.add(compute);
+  }
+
+  pool.wait();
+\end{lstlisting}
+The example shows how to wait for a group of tasks if you need to have it finished before passing on in your program. The \texttt{bam::task\_pool::wait} function waits for all tasks to finish and after that puts the pool back into a busy waiting state.
+
+\subsubsection{Example 4: Getting the return value of a function passed to a threadpool}
+\begin{lstlisting}
+  bam:.task_pool pool;
+
+  std::future<int> ret = pool.add([] () { return 42; });
+
+  // do some stuff
+
+  std::cout << ret.get() << std::endl;
+
+\end{lstlisting}
+The example shows how one can get the return value of a function which is passed to the task\_pool. \texttt{bam::task\_pool::add} returns a \texttt{std::future<>} which you can use to obtain the value returned or exception thrown by the function. 
+
+
+
 \section{Timer}
 \subsection{Timer}
 
