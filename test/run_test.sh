@@ -22,4 +22,5 @@ fi
 echo "running" 
 echo "./"$name "..."
 ./$name
+rm $name
 

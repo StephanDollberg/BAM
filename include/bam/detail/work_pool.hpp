@@ -59,9 +59,9 @@ private:
   bool work_stealable(std::vector<work_pool>& steal_pool) {
     for(auto& it : steal_pool) {
       if(&it != this) {
-        std::lock(m, it.m);
-        std::unique_lock<std::mutex> lock1(m, std::adopt_lock);
-        std::lock_guard<std::mutex> lock2(it.m, std::adopt_lock);
+        std::unique_lock<std::mutex> lock1(m, std::defer_lock);
+        std::unique_lock<std::mutex> lock2(it.m, std::defer_lock);
+        std::lock(lock1, lock2);
 
         auto remaining_work = it.queue.size() / 2;
 

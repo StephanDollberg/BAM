@@ -48,12 +48,12 @@ private:
 
 
   bool work_done() const {
-    m.lock();
+    std::unique_lock<std::mutex> lock(m);
     if(iter == end) {
-      m.unlock();
       return true;
     }
     else {
+      lock.release(); // keep lock locked for the following call to get_chunk
       return false;
     }
   }
@@ -62,9 +62,9 @@ private:
   bool work_stealable(const std::vector<std::unique_ptr<bam::detail::work_range<ra_iter>>>& steal_pool) {
     for(auto it = std::begin(steal_pool); it != std::end(steal_pool); ++it) {
       if(this != it->get()) {
-        std::lock(m, (*it)->m);
-        std::unique_lock<std::mutex> lk1(m, std::adopt_lock);
-        std::lock_guard<std::mutex> lk2((*it)->m, std::adopt_lock);
+        std::unique_lock<std::mutex> lk1(m, std::defer_lock);
+        std::unique_lock<std::mutex> lk2((*it)->m, std::defer_lock);
+        std::lock(lk1, lk2);
 
         auto remaining_work = (*it)->end - (*it)->iter;
         if(remaining_work > grainsize) {
