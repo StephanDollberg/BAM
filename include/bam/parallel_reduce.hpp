@@ -26,36 +26,38 @@ namespace bam {
 template<typename return_type, typename ra_iter, typename worker_predicate, typename join_predicate>
 return_type parallel_reduce(ra_iter begin, ra_iter end, worker_predicate worker, join_predicate joiner, int grainsize = 0) {
   // get all the parameters like threadcount, grainsize and work per thread
-  auto threadcount = bam::detail::get_threadcount(end - begin);
+  auto threadcount = detail::get_threadcount(end - begin);
   if(threadcount == 0)
     return worker(begin, end);
   if(grainsize == 0) {
-    grainsize = bam::detail::get_grainsize(end - begin, threadcount);
+    grainsize = detail::get_grainsize(end - begin, threadcount);
   }
   auto work_piece_per_thread = (end - begin) / threadcount;
 
   // vectors to store work, results and the threads
-  std::vector<std::unique_ptr<bam::detail::work_range<ra_iter>>> work(threadcount); // using unique_ptr to solve uncopyable stuff
+  std::vector<std::unique_ptr<detail::work_range<ra_iter>>> work(threadcount); // using unique_ptr to solve uncopyable stuff
   std::vector<std::future<return_type>> threads(threadcount);
 
   // initialize work
   auto counter = begin;
   for(auto it = std::begin(work); it != std::end(work) - 1; ++it, counter += work_piece_per_thread) {
-    *it = bam::make_unique<bam::detail::work_range<ra_iter>>(counter, counter + work_piece_per_thread, grainsize);
+    *it = make_unique<detail::work_range<ra_iter>>(counter, counter + work_piece_per_thread, grainsize);
   }
-  work.back() = bam::make_unique<bam::detail::work_range<ra_iter>>(counter, end, grainsize);
+  work.back() = make_unique<detail::work_range<ra_iter>>(counter, end, grainsize);
 
   // helper function
   auto work_helper = [&] (int thread_id) ->return_type {
     return_type ret;
 
     if(work[thread_id]->work_available(work)) { // first run initializes ret
-      auto first_work_chunk = work[thread_id]->get_chunk();
+      std::pair<ra_iter, ra_iter> first_work_chunk;
+      work[thread_id]->get_chunk(first_work_chunk);
       ret = worker(first_work_chunk.first, first_work_chunk.second);
     }
 
     while(work[thread_id]->work_available(work)) {
-      auto work_chunk = work[thread_id]->get_chunk();
+      std::pair<ra_iter, ra_iter> work_chunk;
+      work[thread_id]->get_chunk(work_chunk);
       auto result = worker(work_chunk.first, work_chunk.second);
       ret = joiner(ret, result);
     }

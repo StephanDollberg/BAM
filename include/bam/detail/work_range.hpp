@@ -17,21 +17,21 @@ class work_range {
 public:
   work_range(ra_iter begin_, ra_iter end_, unsigned grainsize_) : iter(begin_), end(end_), grainsize(grainsize_)  {}
 
-  std::pair<ra_iter, ra_iter> get_chunk() {
+  void get_chunk(std::pair<ra_iter, ra_iter>& ret) { // take chunk by reference for excep safety
     std::lock_guard<std::mutex> lock(m, std::adopt_lock); // get_chunck() always requires a call to work_available() first
     if(iter < end - grainsize) {
-      auto ret = std::make_pair(iter, iter + grainsize);
+      ret.first = iter;
+      ret.second = iter + grainsize;
       iter += grainsize;
-      return ret;
     }
     else {      
-      auto ret = std::make_pair(iter, end);
+      ret.first = iter;
+      ret.second = end;
       iter = end;
-      return ret;
     }
   }
 
-  bool work_available(const std::vector<std::unique_ptr<bam::detail::work_range<ra_iter>>>& steal_pool) {
+  bool work_available(const std::vector<std::unique_ptr<work_range<ra_iter>>>& steal_pool) {
     if(!work_done() || work_stealable(steal_pool)) {
       return true;
     }
@@ -59,7 +59,7 @@ private:
   }
 
   // steal work from work_ranges in steal_pool
-  bool work_stealable(const std::vector<std::unique_ptr<bam::detail::work_range<ra_iter>>>& steal_pool) {
+  bool work_stealable(const std::vector<std::unique_ptr<work_range<ra_iter>>>& steal_pool) {
     for(auto it = std::begin(steal_pool); it != std::end(steal_pool); ++it) {
       if(this != it->get()) {
         std::unique_lock<std::mutex> lk1(m, std::defer_lock);

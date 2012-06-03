@@ -48,7 +48,8 @@ void parallel_for_each(ra_iter begin, ra_iter end, worker_predicate worker, int 
   // helper function which the threads will run
   auto work_helper = [&] (int thread_id) {
     while(work[thread_id]->work_available(work)) {
-      auto work_chunk = work[thread_id]->get_chunk();
+      std::pair<ra_iter, ra_iter> work_chunk;
+      work[thread_id]->get_chunk(work_chunk);
       std::for_each(work_chunk.first, work_chunk.second, worker);
     }
   };

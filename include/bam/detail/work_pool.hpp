@@ -24,11 +24,10 @@ public:
     queue.push(std::move(task));
   }
 
-  function_wrapper get_work() {
-    std::lock_guard<std::mutex> lock(m, std::adopt_lock); // get_chunck() always requires a call to work_available() first
-    auto ret = std::move(queue.front());
+  void get_work(function_wrapper& ret) { // take function_wrapper by ref for excep safety
+    std::lock_guard<std::mutex> lock(m, std::adopt_lock); // get_work() always requires a call to work_available() first
+    ret = std::move(queue.front());
     queue.pop();
-    return ret;
   }
 
   bool work_available(std::vector<work_pool>& steal_pool) {

@@ -12,12 +12,13 @@
 
 #include "detail/work_pool.hpp"
 #include "detail/parallel_utility.hpp"
+#include "detail/function_wrapper.hpp"
 
 namespace bam {
 
 class task_pool {
 public:
-  task_pool() : done(false), work(bam::detail::get_threadcount()), threads(bam::detail::get_threadcount()) {
+  task_pool() : done(false), work(detail::get_threadcount()), threads(detail::get_threadcount()) {
     try {
       int thread_id = 0;
       for(auto&& i: threads) {
@@ -97,14 +98,16 @@ public:
 
 private:
   std::atomic<bool> done;
-  std::vector<bam::detail::work_pool> work;
+  std::vector<detail::work_pool> work;
   std::vector<std::future<void> > threads;
 
   // worker function, threads will run
   void worker(int thread_id) {
     while(!done) {
       if(work[thread_id].work_available(work)) {
-        work[thread_id].get_work()();
+        detail::function_wrapper task;
+        work[thread_id].get_work(task);
+        task();
       }
       else {
         std::this_thread::yield();
@@ -113,7 +116,9 @@ private:
 
     // finish work
     while(work[thread_id].work_available(work)) {
-      work[thread_id].get_work()();
+      detail::function_wrapper task;
+      work[thread_id].get_work(task);
+      task();
     }
   }
 };
