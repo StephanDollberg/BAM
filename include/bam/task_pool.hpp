@@ -20,7 +20,7 @@ public:
   task_pool() : done(false), work(bam::detail::get_threadcount()), threads(bam::detail::get_threadcount()) {
     try {
       int thread_id = 0;
-      for(auto& i: threads) {
+      for(auto&& i: threads) {
         i = std::async(std::launch::async, &task_pool::worker, this, thread_id++);
       }
     } catch (const std::system_error& err) {
@@ -33,7 +33,11 @@ public:
     done = true;
   }
 
-  // add task that takes no args
+  // No idea why I added this function in the first place
+  //! add task that takes no args
+  /**
+   * \param f argument taking the function object to be added to the task pool
+   */
   template<typename function>
   std::future<typename std::result_of<function()>::type> add(function&& f) {
     typedef typename std::result_of<function()>::type return_type;
@@ -44,7 +48,11 @@ public:
     return ret;
   }
 
-  // add tasks with arguments
+  //! add tasks with arguments
+  /**
+   * \param f argument taking the function object to be added to the task pool
+   * \param args variadic argument to take the parameters for the function being added
+   */
   template<typename function, typename ...Args>
   std::future<typename std::result_of<function(Args...)>::type> add(function&& f, Args&& ...args) {
     typedef typename std::result_of<function(Args...)>::type return_type;
@@ -57,7 +65,7 @@ public:
     return ret;
   }
 
-  // finish tasks
+  //! finish tasks and get ready for new ones
   void wait() {
     done = true;
 
@@ -69,13 +77,22 @@ public:
 
     try {
       int thread_id_counter = 0;
-      for(auto& i : threads)
+      for(auto&& i : threads)
         i = std::async(std::launch::async, &task_pool::worker, this, thread_id_counter++);
     } catch (const std::system_error& err) {
       done = true;
       throw;
     }
 
+  }
+
+  //! finish tasks and don't restart threading
+  void wait_and_finish() {
+    done = true;
+
+    for(auto&& i : threads) {
+      i.get();
+    }
   }
 
 private:
