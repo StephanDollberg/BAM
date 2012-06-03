@@ -15,6 +15,14 @@
 
 namespace bam {
 
+//! parallel_reduce algorithm, which enables parallism on reduce opeartions
+/**
+ * \param begin begin iterator of the range to be worked on
+ * \param end iterator of the range to be worked on
+ * \param worker function object predicate which the threads will run to opearte on the given range
+ * \param joiner function object predicate which will be used to fullfil the reduce operations and combine the results from different threads and determine the result
+ * \param grainsize defines the grainsize, default argument of 0 means that grainsize will be determined on runtime
+ */
 template<typename return_type, typename ra_iter, typename worker_predicate, typename join_predicate>
 return_type parallel_reduce(ra_iter begin, ra_iter end, worker_predicate worker, join_predicate joiner, int grainsize = 0) {
   // get all the parameters like threadcount, grainsize and work per thread

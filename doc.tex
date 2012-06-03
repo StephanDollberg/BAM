@@ -154,7 +154,7 @@ This example shows the very basics when using \texttt{bam::parallel\_reduce}. At
 In this example we want to find the biggest element in a given range. Therefore we use the new C++11 standard function \texttt{std::max\_element} as a worker function, however this time we have to provide a custom join function which returns the iterator with the biggest associated element of the two given iterators.
 
 \section{Task Pool}
-\subsection{Task Pool}
+\subsection{ Basic Task Pool}
 
 The Task Pool class is - in the classical sense - a threadpool. You can add tasks which will be added to the internal queue of the taskpool. It will decide on runtime how many threads will run and work on the tasks. \\\\
 The class offers the following interface:\\
