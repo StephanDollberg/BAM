@@ -27,8 +27,10 @@ template<typename return_type, typename ra_iter, typename worker_predicate, type
 return_type parallel_reduce(ra_iter begin, ra_iter end, worker_predicate worker, join_predicate joiner, int grainsize = 0) {
   // get all the parameters like threadcount, grainsize and work per thread
   auto threadcount = detail::get_threadcount(end - begin);
+
   if(threadcount == 0)
     return worker(begin, end);
+
   if(grainsize == 0) {
     grainsize = detail::get_grainsize(end - begin, threadcount);
   }
@@ -64,7 +66,7 @@ return_type parallel_reduce(ra_iter begin, ra_iter end, worker_predicate worker,
 
   // spawn threads
   auto thread_id_counter = 0;
-  for(auto& i : threads) {
+  for(auto&& i : threads) {
     i = std::async(std::launch::async, work_helper, thread_id_counter++);
   }
 

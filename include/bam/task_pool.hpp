@@ -35,8 +35,8 @@ public:
   }
 
   // No idea why I added this function in the first place
-  //! add task that takes no args
   /**
+   * \brief add task that takes no args
    * \param f argument taking the function object to be added to the task pool
    */
   template<typename function>
@@ -49,8 +49,8 @@ public:
     return ret;
   }
 
-  //! add tasks with arguments
   /**
+   * \brief add tasks with arguments
    * \param f argument taking the function object to be added to the task pool
    * \param args variadic argument to take the parameters for the function being added
    */
@@ -101,12 +101,14 @@ private:
   std::vector<detail::work_pool> work;
   std::vector<std::future<void> > threads;
 
-  // worker function, threads will run
+  /**
+   * @brief worker helper function the threads will run
+   * @param thread_id thread_id which is used to map to the right work_pool
+   */
   void worker(int thread_id) {
+    detail::function_wrapper task;
     while(!done) {
-      if(work[thread_id].work_available(work)) {
-        detail::function_wrapper task;
-        work[thread_id].get_work(task);
+      if(work[thread_id].try_fetch_work(task, work)) {
         task();
       }
       else {
@@ -115,9 +117,7 @@ private:
     }
 
     // finish work
-    while(work[thread_id].work_available(work)) {
-      detail::function_wrapper task;
-      work[thread_id].get_work(task);
+    while(work[thread_id].try_fetch_work(task, work)) {
       task();
     }
   }

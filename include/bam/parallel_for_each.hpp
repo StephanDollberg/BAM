@@ -27,8 +27,10 @@ template<typename ra_iter, typename worker_predicate>
 void parallel_for_each(ra_iter begin, ra_iter end, worker_predicate worker, int grainsize = 0) {
   //get all parameters like threadcount, grainsize and work per thread
   auto threadcount = bam::detail::get_threadcount(end - begin);
+
   if(threadcount == 0)
     return;
+
   if(grainsize == 0) {
     grainsize = bam::detail::get_grainsize(end - begin, threadcount);
   }
@@ -55,12 +57,12 @@ void parallel_for_each(ra_iter begin, ra_iter end, worker_predicate worker, int 
 
   // spawn threads
   auto thread_id_counter = 0;
-  for(auto& i : threads) {
+  for(auto&& i : threads) {
     i = std::async(std::launch::async, work_helper, thread_id_counter++);
   }
 
   // rethrow exceptions
-  for(auto& i : threads) {
+  for(auto&& i : threads) {
     i.get();
   }
 }

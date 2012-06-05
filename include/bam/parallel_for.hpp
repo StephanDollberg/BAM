@@ -55,12 +55,12 @@ void parallel_for(ra_iter begin, ra_iter end, worker_predicate worker, int grain
 
   // spawn threads
   auto thread_id_counter = 0;
-  for(auto& i : threads) {
+  for(auto&& i : threads) {
     i = std::async(std::launch::async, work_helper, thread_id_counter++);
   }
 
   // rethrow exceptions
-  for(auto& i : threads) {
+  for(auto&& i : threads) {
     i.get();
   }
 }
