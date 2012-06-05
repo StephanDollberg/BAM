@@ -1,4 +1,5 @@
 // compile this with -std=c++0x -pthread 
+// alternatively run run_test.sh
 
 #define CATCH_CONFIG_MAIN
 #include "catch.hpp"
@@ -110,7 +111,7 @@ TEST_CASE("task_pool/3", "return value of function from task_pool") {
   CHECK(ret2.get() == 2);
 }
 
-/* notice that on some gcc versions(e.g. 4.6.3 on fedora16, ubuntu 12.04 is fine) std::this_thread::sleep_for for is bugged and won't compile.
+/* notice that on some gcc versions(e.g. 4.6.3 on fedora16, ubuntu 12.04 is fine) std::this_thread::sleep_for for is bugged/wrong configured and won't compile.
  If it doesn't work, you need to use the following flag on compiling -D_GLIBCXX_USE_NANOSLEEP */
 TEST_CASE("timer/1", "elapsed test") {
   bam::timer<> t;

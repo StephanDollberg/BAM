@@ -48,16 +48,13 @@ return_type parallel_reduce(ra_iter begin, ra_iter end, worker_predicate worker,
   // helper function
   auto work_helper = [&] (int thread_id) ->return_type {
     return_type ret;
+    std::pair<ra_iter, ra_iter> work_chunk;
 
-    if(work[thread_id]->work_available(work)) { // first run initializes ret
-      std::pair<ra_iter, ra_iter> first_work_chunk;
-      work[thread_id]->get_chunk(first_work_chunk);
-      ret = worker(first_work_chunk.first, first_work_chunk.second);
+    if(work[thread_id]->try_fetch_work(work_chunk, work)) { // first run initializes ret
+      ret = worker(work_chunk.first, work_chunk.second);
     }
 
-    while(work[thread_id]->work_available(work)) {
-      std::pair<ra_iter, ra_iter> work_chunk;
-      work[thread_id]->get_chunk(work_chunk);
+    while(work[thread_id]->try_fetch_work(work_chunk, work)) {
       auto result = worker(work_chunk.first, work_chunk.second);
       ret = joiner(ret, result);
     }
