@@ -72,18 +72,18 @@ private:
    * @return true if work was stolen, false otherwise
    */
   bool work_stealable(const std::vector<std::unique_ptr<work_range<ra_iter> > >& steal_pool, std::unique_lock<std::mutex>& lk1) {
-    for(auto it = std::begin(steal_pool); it != std::end(steal_pool); ++it) {
-      if(this != it->get()) {
+    for(auto&& i : steal_pool) {
+      if(this != i.get()) {
         lk1.unlock(); // unlock this->m to make it ready for deadlock safe double lock -> std::lock
-        std::unique_lock<std::mutex> lk2((*it)->m, std::defer_lock);
+        std::unique_lock<std::mutex> lk2(i->m, std::defer_lock);
         std::lock(lk1, lk2);
 
-        auto remaining_work = (*it)->end - (*it)->iter;
+        auto remaining_work = i->end - i->iter;
         if(remaining_work > grainsize) {
-          iter = (*it)->iter + remaining_work / 2;
-          end = (*it)->end;
+          iter = i->iter + remaining_work / 2;
+          end = i->end;
 
-          (*it)->end = (*it)->iter + remaining_work / 2;
+          i->end = i->iter + remaining_work / 2;
           return true;
         }
       }
