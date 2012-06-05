@@ -9,6 +9,11 @@
 
 namespace bam { namespace detail {
 
+/**
+ * \brief return grainsize taking number threads and range size into account
+ * \param range_size size of range to worked on by parallel_
+ * \param threadcount number threads to be spawned
+ */
 template<typename distance>
 int get_grainsize(distance range_size, int threadcount) {
   auto work_per_thread = range_size / threadcount;
@@ -21,6 +26,10 @@ int get_grainsize(distance range_size, int threadcount) {
     return 1;
 }
 
+/**
+ * @brief get_threadcount checks hardware concurrency
+ * @return returns number threads to be used
+ */
 inline int get_threadcount() {
   int physicalthreads = std::thread::hardware_concurrency();
   int threadcount =  physicalthreads ? physicalthreads * 2 : 16; // small oversubscription
@@ -28,6 +37,10 @@ inline int get_threadcount() {
   return threadcount;
 }
 
+/**
+ * @brief get_threadcount checks hardware concurrency
+ * \param rangesize range size to be worked on, to check whether there aren't too many threads
+ */
 template<typename distance>
 int get_threadcount(distance rangesize) {
   int physicalthreads = std::thread::hardware_concurrency();

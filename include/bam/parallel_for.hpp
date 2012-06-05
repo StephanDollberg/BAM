@@ -29,9 +29,11 @@ void parallel_for(ra_iter begin, ra_iter end, worker_predicate worker, int grain
   auto threadcount = detail::get_threadcount(end - begin);
   if(threadcount == 0)
     return;
+
   if(grainsize == 0) {
     grainsize = detail::get_grainsize(end - begin, threadcount);
   }
+
   auto work_piece_per_thread = (end - begin) / threadcount;
 
   // vectors to store the threads and work per thread
