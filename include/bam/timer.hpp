@@ -17,6 +17,9 @@ private:
   std::chrono::time_point<std::chrono::high_resolution_clock> last_epoch;
 
 public:
+  /**
+   * @brief timer starts timer
+   */
   timer() : start_point(std::chrono::high_resolution_clock::now()), last_epoch(std::chrono::high_resolution_clock::now()) {}
 
   //! returns the time since creation of timer

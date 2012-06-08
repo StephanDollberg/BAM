@@ -15,7 +15,7 @@
 
 namespace bam {
 
-//! parallel_reduce algorithm, which enables parallism on reduce opeartions
+//! parallel_reduce algorithm, which enables parallelism on reduce opeartions
 /**
  * \param begin begin iterator of the range to be worked on
  * \param end iterator of the range to be worked on
