@@ -225,24 +225,24 @@ The example shows how one can get the return value of a function which is passed
 
 The Timer class 
 \begin{lstlisting}
-template<typename resolution = std::chrono::milliseconds>
+template<typename resolution>
 class timer;
 \end{lstlisting}
 
  is a template class which wraps some \texttt{std::chrono} stuff into an easy to use class. The template type referes to a \texttt{std::chrono} duration type. The following examples  will make it's use pretty clear.
-\subsubsection{Example 1: Measure a single event}
+\subsubsection{Example 1: Measure a single event with basic\_timer}
 \begin{lstlisting}
-  bam::timer<> t;
+  bam::basic_timer t;
   compute();
   std::cout << t.elapsed() << std::endl;
 \end{lstlisting}
 
-This is the most simple usecase, at first we create a timer object. On creation, the timer starts automatically, we then compute something and finally print the elapsed time since the timer started. The timer has a default template which defaults to \texttt{std::chrono::milliseconds}.
+This is the most simple usecase, at first we create a timer object. On creation, the timer starts automatically, we then compute something and finally print the elapsed time since the timer started. \texttt{basic\_timer} is a typedef for \texttt{timer<std::chrono::milliseconds>}.
 \subsubsection{Example 2: Measure a series of events}
 The next example will show another feature which makes the timer class perfect for timing and comparing different functions.
 
 \begin{lstlisting}
-  bam::timer<std::chorno::seconds> t;
+  bam::timer<std::chrono::seconds> t;
   compute1();
   std::cout << t.since_last_epoch() << std::endl;
   compute2();

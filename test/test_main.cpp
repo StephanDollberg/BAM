@@ -207,7 +207,7 @@ TEST_CASE("timer/2", "last_epoch without elapsed") {
 }
 
 TEST_CASE("timer/3", "last_epoch with elapsed") {
-  bam::basic_timer t;
+  bam::timer<std::chrono::milliseconds> t;
   auto dura = std::chrono::milliseconds(20);
   std::this_thread::sleep_for(dura);
   CHECK(t.elapsed() >= dura.count());
