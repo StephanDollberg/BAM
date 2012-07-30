@@ -10,7 +10,7 @@
 namespace bam {
 
 //! Timer class which enables you to measure elapsed time intervals
-template<class resolution = std::chrono::milliseconds>
+template<class resolution>
 class timer {
 private:
   std::chrono::time_point<std::chrono::high_resolution_clock> start_point;
@@ -36,6 +36,8 @@ public:
   }
 
 };
+
+typedef timer<std::chrono::milliseconds> basic_timer;
 
 }
 
