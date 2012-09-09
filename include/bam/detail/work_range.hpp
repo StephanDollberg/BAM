@@ -9,6 +9,8 @@
 
 #include <utility>
 #include <mutex>
+#include <vector>
+#include <memory>
 
 namespace bam { namespace detail {
 

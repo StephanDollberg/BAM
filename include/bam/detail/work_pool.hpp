@@ -12,6 +12,8 @@
 #include <mutex>
 #include <queue>
 #include <future>
+#include <vector>
+#include <utility>
 
 namespace bam { namespace detail {
 

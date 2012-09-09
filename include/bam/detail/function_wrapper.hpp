@@ -3,6 +3,9 @@
 #ifndef FUNCTION_WRAPPER_HPP
 #define FUNCTION_WRAPPER_HPP
 
+#include <memory>
+#include <utility>
+
 namespace bam { namespace detail {
 
 class function_wrapper
