@@ -7,12 +7,11 @@
 #ifndef BAM_WORK_POOL_HPP
 #define BAM_WORK_POOL_HPP
 
+#include "function_wrapper.hpp"
+
 #include <mutex>
 #include <queue>
 #include <future>
-
-#include "function_wrapper.hpp"
-
 
 namespace bam { namespace detail {
 

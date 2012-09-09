@@ -5,14 +5,14 @@
 #ifndef BAM_TASK_POOL_HPP
 #define BAM_TASK_POOL_HPP
 
+#include "detail/work_pool.hpp"
+#include "detail/parallel_utility.hpp"
+#include "detail/function_wrapper.hpp"
+
 #include <vector>
 #include <future>
 #include <atomic>
 #include <functional>
-
-#include "detail/work_pool.hpp"
-#include "detail/parallel_utility.hpp"
-#include "detail/function_wrapper.hpp"
 
 namespace bam {
 

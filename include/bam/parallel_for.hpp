@@ -5,14 +5,14 @@
 #ifndef BAM_PARALLEL_FOR_H
 #define BAM_PARALLEL_FOR_H
 
+#include "detail/work_range.hpp"
+#include "detail/parallel_utility.hpp"
+#include "utility.hpp"
+
 #include<vector>
 #include<memory>
 #include<iterator>
 #include<future>
-
-#include "detail/work_range.hpp"
-#include "detail/parallel_utility.hpp"
-#include "utility.hpp"
 
 namespace bam {
 
