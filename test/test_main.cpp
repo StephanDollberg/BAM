@@ -15,15 +15,15 @@
 #include <algorithm>
 #include <exception>
 
-// grainsize tests on parallel_
-// exception tests on task_pool
+// TODO grainsize tests on parallel_
+// TODO exception tests on task_pool
 
 TEST_CASE("parallel_for/1", "parallel_for on small range ") {
   std::vector<int> v(6, 1);
   typedef std::vector<int>::iterator iter;
   auto worker = [] (iter begin, iter end) { for(auto it = begin; it != end; ++it) { *it *= 2; } };
   bam::parallel_for(std::begin(v), std::end(v), worker);
-  CHECK(std::accumulate(std::begin(v), std::end(v), 0) == 2 * v.size());
+  CHECK(std::accumulate(std::begin(v), std::end(v), 0) == 2 * static_cast<int>(v.size()));
 }
 
 TEST_CASE("parallel_for/2", "parallel_for on large range range ") {
@@ -31,7 +31,7 @@ TEST_CASE("parallel_for/2", "parallel_for on large range range ") {
   typedef std::vector<int>::iterator iter;
   auto worker = [] (iter begin, iter end) { for(auto it = begin; it != end; ++it) { *it *= 2; } };
   bam::parallel_for(std::begin(v), std::end(v), worker);
-  CHECK(std::accumulate(std::begin(v), std::end(v), 0) == 2 * v.size());
+  CHECK(std::accumulate(std::begin(v), std::end(v), 0) == 2 * static_cast<int>(v.size()));
 }
 
 TEST_CASE("parallel_for/3", "parallel_for on 0 range ") {
@@ -39,7 +39,7 @@ TEST_CASE("parallel_for/3", "parallel_for on 0 range ") {
   typedef std::vector<int>::iterator iter;
   auto worker = [] (iter begin, iter end) { for(auto it = begin; it != end; ++it) { *it *= 2; } };
   bam::parallel_for(std::begin(v), std::end(v), worker);
-  CHECK(std::accumulate(std::begin(v), std::end(v), 0) == 2 * v.size());
+  CHECK(std::accumulate(std::begin(v), std::end(v), 0) == 2 * static_cast<int>(v.size()));
 }
 
 TEST_CASE("parallel_for/4", "parallel_for on a 1 element range") {
@@ -47,7 +47,7 @@ TEST_CASE("parallel_for/4", "parallel_for on a 1 element range") {
   typedef std::vector<int>::iterator iter;
   auto worker = [] (iter begin, iter end) { for(auto it = begin; it != end; ++it) { *it *= 2; } };
   bam::parallel_for(std::begin(v), std::end(v), worker);
-  CHECK(std::accumulate(std::begin(v), std::end(v), 0) == 2 * v.size());
+  CHECK(std::accumulate(std::begin(v), std::end(v), 0) == 2 * static_cast<int>(v.size()));
 }
 
 // lame
@@ -60,7 +60,7 @@ TEST_CASE("parallel_for/5", "parallel_for on negative elements range") {
   int start = -1 * v.size() + 1;
   int end = 0;
   bam::parallel_for(start, end, worker);
-  CHECK(std::accumulate(std::begin(v), std::end(v), 0) == 2 * v.size() - 1);
+  CHECK(std::accumulate(std::begin(v), std::end(v), 0) == 2 * static_cast<int>(v.size()) - 1);
 }
 
 TEST_CASE("parallel_for/6", "parallel_for excep from worker thread") {
@@ -78,13 +78,13 @@ TEST_CASE("parallel_for/6", "parallel_for excep from worker thread") {
 TEST_CASE("parallel_for_each/1", "compute and accumulate") {
   std::vector<int> v(6, 1);
   bam::parallel_for_each(std::begin(v), std::end(v), [] (int& i) { i *= 2; });
-  CHECK(std::accumulate(std::begin(v), std::end(v), 0) == 2 * v.size());
+  CHECK(std::accumulate(std::begin(v), std::end(v), 0) == 2 * static_cast<int>(v.size()));
 }
   
 TEST_CASE("parallel_for_each/2", "compute and accumulate on large range") {
   std::vector<int> v(25000, 1);
   bam::parallel_for_each(std::begin(v), std::end(v), [] (int& i) { i *= 2; });
-  CHECK(std::accumulate(std::begin(v), std::end(v), 0) == 2 * v.size());
+  CHECK(std::accumulate(std::begin(v), std::end(v), 0) == 2 * static_cast<int>(v.size()));
 }
 
 TEST_CASE("parallel_for_each/3", "compute and accumulate on empty range") {
@@ -96,7 +96,7 @@ TEST_CASE("parallel_for_each/3", "compute and accumulate on empty range") {
 TEST_CASE("parallel_for_each/4", "compute and accumulate on 1 element range") {
   std::vector<int> v(1, 1);
   bam::parallel_for_each(std::begin(v), std::end(v), [] (int& i) { i *= 2; });
-  CHECK(std::accumulate(std::begin(v), std::end(v), 0) == 2 * v.size());
+  CHECK(std::accumulate(std::begin(v), std::end(v), 0) == 2 * static_cast<int>(v.size()));
 }
 
 TEST_CASE("parallel_for_each/5", "test exception in worker function") {
@@ -151,7 +151,7 @@ TEST_CASE("parallel_reduce/5", "parallel_reduce on negative elements range") {
 TEST_CASE("parallel_reduce/6", "test exception in worker function") {
   std::vector<int> v {1, 2, 3, 4, 5, 6};
   typedef std::vector<int>::iterator iter;
-  auto worker = [] (iter begin, iter end) ->int  { throw std::runtime_error("testing exception from worker"); return 0; };
+  auto worker = [] (iter, iter) ->int  { throw std::runtime_error("testing exception from worker"); return 0; };
   auto joiner = [] (int a, int b) -> int { return std::max(a, b); };
   CHECK_THROWS_AS(bam::parallel_reduce<int>(std::begin(v), std::end(v), worker, joiner), std::runtime_error);
 }

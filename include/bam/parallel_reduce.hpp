@@ -50,7 +50,7 @@ return_type parallel_reduce(ra_iter begin, ra_iter end, worker_predicate worker,
 
   // helper function
   auto work_helper = [&] (typename std::list<detail::work_range<ra_iter>>::iterator thread_iter) -> return_type {
-    return_type ret;
+    return_type ret = return_type();
     std::pair<ra_iter, ra_iter> work_chunk;
 
     if(thread_iter->try_fetch_work(work_chunk, work)) { // first run initializes ret
