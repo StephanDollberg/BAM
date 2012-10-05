@@ -9,7 +9,7 @@
 
 #include <utility>
 #include <mutex>
-#include <vector>
+#include <list>
 #include <memory>
 
 namespace bam { namespace detail {
@@ -23,10 +23,10 @@ public:
   /**
    * @brief try_fetch_work tries to fetch work
    * @param chunk work chunk to fill with work
-   * @param steal_pool vector of other work_ranges from which can be stolen if all work is done
+   * @param steal_pool list of other work_ranges from which can be stolen if all work is done
    * @return true if work was aquired, false otherwise
    */
-  bool try_fetch_work(std::pair<ra_iter, ra_iter>& chunk, const std::vector<std::unique_ptr<work_range<ra_iter> > >& steal_pool) {
+  bool try_fetch_work(std::pair<ra_iter, ra_iter>& chunk, std::list<work_range<ra_iter>>& steal_pool) {
     std::unique_lock<std::mutex> lock(m);
     if (try_get_chunk(chunk)) {
       return true;
@@ -73,19 +73,19 @@ private:
    * @param lk1 std::unique_lock which is currently locked from this->try_fetch_work call
    * @return true if work was stolen, false otherwise
    */
-  bool work_stealable(const std::vector<std::unique_ptr<work_range<ra_iter> > >& steal_pool, std::unique_lock<std::mutex>& lk1) {
+  bool work_stealable(std::list<work_range<ra_iter>>& steal_pool, std::unique_lock<std::mutex>& lk1) {
     for(auto&& i : steal_pool) {
-      if(this != i.get()) {
+      if(this != &i) {
         lk1.unlock(); // unlock this->m to make it ready for deadlock safe double lock -> std::lock
-        std::unique_lock<std::mutex> lk2(i->m, std::defer_lock);
+        std::unique_lock<std::mutex> lk2(i.m, std::defer_lock);
         std::lock(lk1, lk2);
 
-        auto remaining_work = i->end - i->iter;
+        auto remaining_work = i.end - i.iter;
         if(remaining_work > grainsize) {
-          iter = i->iter + remaining_work / 2;
-          end = i->end;
+          iter = i.iter + remaining_work / 2;
+          end = i.end;
 
-          i->end = i->iter + remaining_work / 2;
+          i.end = i.iter + remaining_work / 2;
           return true;
         }
       }

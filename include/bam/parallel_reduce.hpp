@@ -10,7 +10,7 @@
 #include "utility.hpp"
 
 #include <vector>
-#include <memory>
+#include <list>
 #include <future>
 #include <iterator>
 
@@ -38,26 +38,26 @@ return_type parallel_reduce(ra_iter begin, ra_iter end, worker_predicate worker,
   auto work_piece_per_thread = (end - begin) / threadcount;
 
   // vectors to store work, results and the threads
-  std::vector<std::unique_ptr<detail::work_range<ra_iter>>> work(threadcount); // using unique_ptr to solve uncopyable stuff
-  std::vector<std::future<return_type>> threads(threadcount);
+  std::list<detail::work_range<ra_iter>> work;
+  std::vector<std::future<return_type>> threads;
 
-  // initialize work
+  // build the work for each thread
   auto counter = begin;
-  for(auto it = std::begin(work); it != std::end(work) - 1; ++it, counter += work_piece_per_thread) {
-    *it = make_unique<detail::work_range<ra_iter>>(counter, counter + work_piece_per_thread, grainsize);
+  for(; counter < end - work_piece_per_thread; counter += work_piece_per_thread) {
+    work.emplace_back(counter, counter + work_piece_per_thread, grainsize);
   }
-  work.back() = make_unique<detail::work_range<ra_iter>>(counter, end, grainsize);
+  work.emplace_back(counter, end, grainsize);
 
   // helper function
-  auto work_helper = [&] (int thread_id) ->return_type {
+  auto work_helper = [&] (typename std::list<detail::work_range<ra_iter>>::iterator thread_iter) -> return_type {
     return_type ret;
     std::pair<ra_iter, ra_iter> work_chunk;
 
-    if(work[thread_id]->try_fetch_work(work_chunk, work)) { // first run initializes ret
+    if(thread_iter->try_fetch_work(work_chunk, work)) { // first run initializes ret
       ret = worker(work_chunk.first, work_chunk.second);
     }
 
-    while(work[thread_id]->try_fetch_work(work_chunk, work)) {
+    while(thread_iter->try_fetch_work(work_chunk, work)) {
       auto result = worker(work_chunk.first, work_chunk.second);
       ret = joiner(ret, result);
     }
@@ -66,9 +66,8 @@ return_type parallel_reduce(ra_iter begin, ra_iter end, worker_predicate worker,
   };
 
   // spawn threads
-  auto thread_id_counter = 0;
-  for(auto&& i : threads) {
-    i = std::async(std::launch::async, work_helper, thread_id_counter++);
+  for(auto it = std::begin(work); it != std::end(work); ++it) {
+    threads.emplace_back(std::async(std::launch::async, work_helper, it));
   }
 
   // join results

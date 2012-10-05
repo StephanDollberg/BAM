@@ -9,10 +9,11 @@
 #include "detail/parallel_utility.hpp"
 #include "utility.hpp"
 
-#include<vector>
-#include<memory>
-#include<iterator>
-#include<future>
+#include <list>
+#include <vector>
+#include <memory>
+#include <iterator>
+#include <future>
 
 namespace bam {
 
@@ -37,28 +38,28 @@ void parallel_for(ra_iter begin, ra_iter end, worker_predicate worker, int grain
   auto work_piece_per_thread = (end - begin) / threadcount;
 
   // vectors to store the threads and work per thread
-  std::vector<std::unique_ptr<detail::work_range<ra_iter>>> work(threadcount); // using unique_ptr to solve uncopyable stuff
-  std::vector<std::future<void> > threads(threadcount);
+  std::list<detail::work_range<ra_iter>> work;
+  std::vector<std::future<void>> threads;
 
   // build the work for each thread
   auto counter = begin;
-  for(auto it = std::begin(work); it != std::end(work) - 1; ++it, counter += work_piece_per_thread) {
-    *it = make_unique<detail::work_range<ra_iter>>(counter, counter + work_piece_per_thread, grainsize);
+  for(; counter < end - work_piece_per_thread; counter += work_piece_per_thread) {
+    work.emplace_back(counter, counter + work_piece_per_thread, grainsize);
   }
-  work.back() = make_unique<detail::work_range<ra_iter>>(counter, end, grainsize);
+  work.emplace_back(counter, end, grainsize);
+
 
   // helper function which the threads will run
-  auto work_helper = [&] (int thread_id) {
+  auto work_helper = [&] (typename std::list<detail::work_range<ra_iter>>::iterator thread_iter) {
     std::pair<ra_iter, ra_iter> work_chunk;
-    while(work[thread_id]->try_fetch_work(work_chunk, work)) {
+    while(thread_iter->try_fetch_work(work_chunk, work)) {
       worker(work_chunk.first, work_chunk.second);
     }
   };
 
   // spawn threads
-  auto thread_id_counter = 0;
-  for(auto&& i : threads) {
-    i = std::async(std::launch::async, work_helper, thread_id_counter++);
+  for(auto it = std::begin(work); it != std::end(work); ++it) {
+    threads.emplace_back(std::async(std::launch::async, work_helper, it));
   }
 
   // rethrow exceptions

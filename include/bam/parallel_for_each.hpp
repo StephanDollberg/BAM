@@ -9,11 +9,11 @@
 #include "detail/parallel_utility.hpp"
 #include "utility.hpp"
 
-#include<future>
-#include<vector>
-#include<memory>
-#include<iterator>
-#include<algorithm>
+#include <future>
+#include <vector>
+#include <list>
+#include <iterator>
+#include <algorithm>
 
 namespace bam {
 
@@ -38,28 +38,28 @@ void parallel_for_each(ra_iter begin, ra_iter end, worker_predicate worker, int 
   auto work_piece_per_thread = (end - begin) / threadcount;
 
   // vectors to store all threads and work for each thread
-  std::vector<std::unique_ptr<bam::detail::work_range<ra_iter>>> work(threadcount); // using unique_ptr to solve uncopyable stuff
-  std::vector<std::future<void> > threads(threadcount);
+  std::list<detail::work_range<ra_iter>> work;
+  std::vector<std::future<void> > threads;
 
-  // build work for each thread
+  // build the work for each thread
   auto counter = begin;
-  for(auto it = std::begin(work); it != std::end(work) - 1; ++it, counter += work_piece_per_thread) {
-    *it = bam::make_unique<bam::detail::work_range<ra_iter>>(counter, counter + work_piece_per_thread, grainsize);
+  for(; counter < end - work_piece_per_thread; counter += work_piece_per_thread) {
+    work.emplace_back(counter, counter + work_piece_per_thread, grainsize);
   }
-  work.back() = bam::make_unique<bam::detail::work_range<ra_iter>>(counter, end, grainsize);
+  work.emplace_back(counter, end, grainsize);
 
   // helper function which the threads will run
-  auto work_helper = [&] (int thread_id) {
+  auto work_helper = [&] (typename std::list<detail::work_range<ra_iter>>::iterator thread_iter) {
     std::pair<ra_iter, ra_iter> work_chunk;
-    while(work[thread_id]->try_fetch_work(work_chunk, work)) {
+    while(thread_iter->try_fetch_work(work_chunk, work)) {
       std::for_each(work_chunk.first, work_chunk.second, worker);
     }
   };
 
+
   // spawn threads
-  auto thread_id_counter = 0;
-  for(auto&& i : threads) {
-    i = std::async(std::launch::async, work_helper, thread_id_counter++);
+  for(auto it = std::begin(work); it != std::end(work); ++it) {
+    threads.emplace_back(std::async(std::launch::async, work_helper, it));
   }
 
   // rethrow exceptions
