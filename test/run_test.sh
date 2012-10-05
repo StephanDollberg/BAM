@@ -3,7 +3,7 @@
 name="test"
 
 compiler="g++"
-define_keyword="fedora"
+define_keyword="DEXTRA"
 define_args="-D_GLIBCXX_USE_SCHED_YIELD -D_GLIBCXX_USE_NANOSLEEP"
 compile_options="-std=c++0x -pthread -O2 -o $name test_main.cpp"
 
