@@ -17,6 +17,8 @@ private:
   std::chrono::time_point<std::chrono::high_resolution_clock> last_epoch;
 
 public:
+  typedef resolution resolution_type;
+
   /**
    * @brief timer starts timer
    */
