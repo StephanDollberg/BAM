@@ -8,6 +8,7 @@
 #include "../include/bam/parallel_for_each.hpp"
 #include "../include/bam/parallel_for.hpp"
 #include "../include/bam/parallel_reduce.hpp"
+#include "../include/bam/parallel_invoke.hpp"
 #include "../include/bam/task_pool.hpp"
 #include "../include/bam/timer.hpp"
 
@@ -155,6 +156,17 @@ TEST_CASE("parallel_reduce/6", "test exception in worker function") {
   auto joiner = [] (int a, int b) -> int { return std::max(a, b); };
   CHECK_THROWS_AS(bam::parallel_reduce<int>(std::begin(v), std::end(v), worker, joiner), std::runtime_error);
 }
+
+TEST_CASE("parallel_invoke", "testing 3 functions") {
+  std::vector<int> v { 1, 2, 3 };
+  auto foo1 = [&] () { v[0] *= 2; };
+  auto foo2 = [&] () { v[1] *= 2; };
+  auto foo3 = [&] () { v[2] *= 2; };
+
+  bam::parallel_invoke(foo1, foo2, foo3);
+  CHECK(std::accumulate(std::begin(v), std::end(v), 0) == 12);
+}
+
 
 TEST_CASE("task_pool/1", "task_pool add one task") {
   std::vector<int> v(1, 1);
