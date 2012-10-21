@@ -6,23 +6,27 @@
 #define BAM_PARALLEL_INVOKE_HPP
 
 #include "task_pool.hpp"
+#include "timer.hpp"
 
 #include <vector>
+#include <thread>
 
 namespace bam {
 
 /**
- * @brief invokes n functions in parallel; simple wrapper around a bam::task_pool
+ * @brief invokes n functions in parallel; simple wrapper around some std::asyncs
  * @tparam Fs variadic template param
  * @param fs variadic function param, each representing a function
  */
 template<typename ... Fs>
 void parallel_invoke(Fs ...fs) {
-  task_pool pool;
+
   std::vector<std::function<void()>> v_foos { fs ... };
 
+  std::vector<std::future<void>> temp_futs;
+
   for(auto&& i : v_foos) {
-    pool.add(i);
+    temp_futs.push_back(std::async(std::launch::async, i));
   }
 }
 
