@@ -5,11 +5,8 @@
 #ifndef BAM_PARALLEL_INVOKE_HPP
 #define BAM_PARALLEL_INVOKE_HPP
 
-#include "task_pool.hpp"
-#include "timer.hpp"
-
 #include <vector>
-#include <thread>
+#include <future>
 
 namespace bam {
 
