@@ -2,8 +2,8 @@
 // Software License, Version 1.0. (See accompanying file
 // LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
-#ifndef BAM_BENCHSUIT_HPP
-#define BAM_BENCHSUIT_HPP
+#ifndef BAM_BENCHSUITE_HPP
+#define BAM_BENCHSUITE_HPP
 
 #include<vector>
 #include<functional>
@@ -14,7 +14,7 @@
 namespace bam { namespace detail {
 
 template<typename resolution>
-class benchsuit {
+class benchsuite {
 public:
 
   template<typename function, typename... Args>
@@ -39,4 +39,4 @@ private:
 
 }}
 
-#endif // BAM_BENCHSUIT_HPP
+#endif // BAM_BENCHSUITE_HPP
