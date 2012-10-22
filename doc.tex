@@ -207,7 +207,7 @@ The example shows how to wait for a group of tasks if you need to have it finish
 
 \subsubsection{Example 4: Getting the return value of a function passed to a threadpool}
 \begin{lstlisting}
-  bam:.task_pool pool;
+  bam::task_pool pool;
 
   std::future<int> ret = pool.add([] () { return 42; });
 
@@ -253,5 +253,24 @@ The next example will show another feature which makes the timer class perfect f
 
 This time we changed our resolution type to \texttt{std::chrono::seconds}. We call 3 different compute functions and print how much time each function needed. \texttt{timer::since\_last\_epoch} returns the time which elapsed since the last call to either \texttt{timer::elapsed} or \texttt{timer::since\_last\_epoch}, in contrary to \texttt{timer::elapsed} which always returns the time since the creation of the timer.
 
+
+\section{parallel\_invoke}
+\subsection{parallel\_invoke}
+
+\texttt{parallel\_invoke} enables you to invoke n-number of functions in parallel. It's basically a simple wrapper around \texttt{std::async}, the disadvantage is though that you can't save the futures from each single function.
+
+\subsubsection{Example 1: Invoking 3 functions in parallel}
+
+\begin{lstlisting}
+  bam::parallel_invoke([] { std::cout << "hello from 1" << std::endl; }, [] { std::cout << "hello from 2" << std::endl; }, [] { std::cout << "hello from 3" << std::endl; });
+\end{lstlisting}
+
+If any of the given functions throws an exception, the exception will be rethrown.
+
+\subsubsection{Example 2: Throwing an exception}
+
+\begin{lstlisting}
+  bam::parallel_invoke([] { throw std::runtime_error("hello from exception")});
+\end{lstlisting}
 
 \end{document}

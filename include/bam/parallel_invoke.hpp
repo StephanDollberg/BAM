@@ -25,6 +25,11 @@ void parallel_invoke(Fs ...fs) {
   for(auto&& i : v_foos) {
     temp_futs.push_back(std::async(std::launch::async, i));
   }
+
+  for(auto&& i : temp_futs) {
+  	i.get();
+  }
+
 }
 
 }

@@ -18,7 +18,7 @@ Tests are done using the great Catch Testing framework (https://github.com/phils
 
 #Documentation
 
-The Documentation serves as a tutorial which explains all the algorithms and possiblities. It is written with Latex - again to learn the language - and is probably most of the time not complete.
+The Documentation serves as a tutorial which explains all the algorithms and possiblities. It is written with Latex - again to learn the language. The pdf version might be out of date from time to time as I don't commit the latest version on every push. You can compile the .tex file to get the newest version.
 
 #Thanks
 
