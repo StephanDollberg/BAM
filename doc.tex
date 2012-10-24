@@ -205,7 +205,7 @@ This time we run a function which takes an argument. The interface for \texttt{b
 \end{lstlisting}
 The example shows how to wait for a group of tasks if you need to have it finished before passing on in your program. The \texttt{bam::task\_pool::wait} function waits for all tasks to finish and after that puts the pool back into a busy waiting state.
 
-\subsubsection{Example 4: Getting the return value of a function passed to a threadpool}
+\subsubsection{Example 4: Getting the return value of a function passed to a taskpool}
 \begin{lstlisting}
   bam::task_pool pool;
 
@@ -217,8 +217,20 @@ The example shows how to wait for a group of tasks if you need to have it finish
 
 \end{lstlisting}
 The example shows how one can get the return value of a function which is passed to the task\_pool. \texttt{bam::task\_pool::add} returns a \texttt{std::future<>} which you can use to obtain the value returned or exception thrown by the function. 
+\subsubsection{Example 5: Misusing a task\_pool}
+This example shows how you should not use a \texttt{task\_pool}.
 
+\begin{lstlisting}
+  auto worker = [] (int& x) { x *= compute(x); };
+  std::vector<int> v2 = init_vector();
 
+  bam::task_pool pool;
+  for(auto& i : v2) {
+    pool.add(worker, std::ref(i));
+  }
+  pool.wait_and_finish();
+\end{lstlisting}
+This example is a perfect usecase for the \texttt{parallel\_for\_each} template. There is too much overhead involved when using a \texttt{task\_pool}. The \texttt{task\_pool} first starts to pay out when the functions get more complex and the problem can't be packed into an embarrassingly parallel solution.
 
 \section{Timer}
 \subsection{Timer}
