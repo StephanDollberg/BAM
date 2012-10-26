@@ -8,6 +8,8 @@
 #include "detail/work_pool.hpp"
 #include "detail/parallel_utility.hpp"
 #include "detail/function_wrapper.hpp"
+#include "detail/semaphore.hpp"
+
 
 #include <vector>
 #include <future>
@@ -18,35 +20,16 @@ namespace bam {
 
 class task_pool {
 public:
-  task_pool() : done(false), work(detail::get_threadcount()), threads(detail::get_threadcount()) {
-    try {
-      int thread_id = 0;
-      for(auto&& i: threads) {
-        i = std::async(std::launch::async, &task_pool::worker, this, thread_id++);
-      }
-    } catch (const std::system_error& err) {
-      done = true;
-      throw;
-    }
+  task_pool() : sem(0), done(false), work(detail::get_threadcount()), threads(detail::get_threadcount()) {
+    init_impl();
   }
 
   ~task_pool() {
     done = true;
-  }
 
-  // No idea why I added this function in the first place
-  /**
-   * \brief add task that takes no args
-   * \param f argument taking the function object to be added to the task pool
-   */
-  template<typename function>
-  std::future<typename std::result_of<function()>::type> add(function&& f) {
-    typedef typename std::result_of<function()>::type return_type;
-
-    std::packaged_task<return_type()> task(std::move(f));
-    auto ret = task.get_future();
-    work[0].push_back(std::move(task));  // profiling needed
-    return ret;
+    for(auto i = 0u; i != threads.size(); ++i) {
+      sem.post();
+    }
   }
 
   /**
@@ -63,15 +46,13 @@ public:
     auto ret = task.get_future();
 
     work[0].push_back(std::move(task)); // profiling needed
+    sem.post();
     return ret;
   }
 
   //! finish tasks and get ready for new ones
   void wait() {
-    done = true;
-
-    for(auto& i : threads)
-      i.get();
+    wait_impl();
 
     // make task pool ready to work again after all work has been finished
     done = false;
@@ -84,19 +65,15 @@ public:
       done = true;
       throw;
     }
-
   }
 
   //! finish tasks and don't restart threading
   void wait_and_finish() {
-    done = true;
-
-    for(auto&& i : threads) {
-      i.get();
-    }
+    wait_impl();
   }
 
 private:
+  detail::semaphore sem;
   std::atomic<bool> done;
   std::vector<detail::work_pool> work;
   std::vector<std::future<void> > threads;
@@ -113,12 +90,43 @@ private:
       }
       else {
         std::this_thread::yield();
+        sem.wait();
       }
     }
 
     // finish work
     while(work[thread_id].try_fetch_work(task, work)) {
       task();
+    }
+  }
+
+  /**
+   * @brief waits till all threads have finished
+   */
+  void wait_impl() {
+    done = true;
+
+    for(auto i = 0u; i != threads.size(); ++i) {
+      sem.post();
+    }
+
+    for(auto& i : threads) {
+      i.get();
+    }
+  }
+
+  /**
+   * @brief starts threads with worker func
+   */
+  void init_impl() {
+    try {
+      int thread_id = 0;
+      for(auto&& i: threads) {
+        i = std::async(std::launch::async, &task_pool::worker, this, thread_id++);
+      }
+    } catch (const std::system_error& err) {
+      done = true;
+      throw;
     }
   }
 };

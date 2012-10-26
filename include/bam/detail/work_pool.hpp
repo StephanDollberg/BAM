@@ -84,7 +84,16 @@ private:
         std::unique_lock<std::mutex> lock2(it.m, std::defer_lock);
         std::lock(lock1, lock2);
 
-        auto remaining_work = it.queue.size() / 2;
+        const int queue_size = it.queue.size();
+        auto remaining_work = 0;
+
+        // we need to steal at least one function. This is needed for the semaphore signaling meachanism 
+        if(queue_size == 1) {
+          remaining_work = 1;
+        }
+        else {
+          remaining_work = queue_size / 2;
+        }
 
         if(remaining_work > 0) {
           while(remaining_work-- > 0) {
