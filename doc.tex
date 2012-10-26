@@ -184,7 +184,7 @@ The following examples will make the use pretty clear:
 
 \end{lstlisting}
 
-We simply create a \texttt{task\_pool} to which we add a function which prints a string to the output. One important thing to note is that the taskpool is busy waiting which means that if you don't need it, you should limit its scope, to prevent it from keeping your CPU wasting cycles.
+We simply create a \texttt{task\_pool} to which we add a function which prints a string to the output. 
 
 \subsubsection{Example 2: Run a task with arguments}
 \begin{lstlisting}
@@ -203,7 +203,7 @@ This time we run a function which takes an argument. The interface for \texttt{b
 
   pool.wait();
 \end{lstlisting}
-The example shows how to wait for a group of tasks if you need to have it finished before passing on in your program. The \texttt{bam::task\_pool::wait} function waits for all tasks to finish and after that puts the pool back into a busy waiting state.
+The example shows how to wait for a group of tasks if you need to have it finished before passing on in your program. The \texttt{bam::task\_pool::wait} function waits for all tasks to finish and after that puts the pool back into a waiting state.
 
 \subsubsection{Example 4: Getting the return value of a function passed to a taskpool}
 \begin{lstlisting}
@@ -217,6 +217,7 @@ The example shows how to wait for a group of tasks if you need to have it finish
 
 \end{lstlisting}
 The example shows how one can get the return value of a function which is passed to the task\_pool. \texttt{bam::task\_pool::add} returns a \texttt{std::future<>} which you can use to obtain the value returned or exception thrown by the function. 
+
 \subsubsection{Example 5: Misusing a task\_pool}
 This example shows how you should not use a \texttt{task\_pool}.
 

@@ -8,7 +8,7 @@
 namespace bam { namespace detail {
 
 /**
- * @brief basic semaphore, used as a non-busy signaling system in task_pool
+ * @brief basic semaphore, used as a non-busy signalling system in task_pool
  */
 class semaphore {
 public:
@@ -57,19 +57,6 @@ private:
 
 
 } }
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 #endif // BAM_SEMAPHORE
