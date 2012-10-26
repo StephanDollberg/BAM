@@ -15,6 +15,7 @@
 #include <vector>
 #include <algorithm>
 #include <exception>
+#include <atomic>
 
 // TODO grainsize tests on parallel_
 // TODO exception tests on task_pool
@@ -27,7 +28,7 @@ TEST_CASE("parallel_for/1", "parallel_for on small range ") {
   CHECK(std::accumulate(std::begin(v), std::end(v), 0) == 2 * static_cast<int>(v.size()));
 }
 
-TEST_CASE("parallel_for/2", "parallel_for on large range range ") {
+TEST_CASE("parallel_for/2", "parallel_for on large range ") {
   std::vector<int> v(25000, 1);
   typedef std::vector<int>::iterator iter;
   auto worker = [] (iter begin, iter end) { for(auto it = begin; it != end; ++it) { *it *= 2; } };
@@ -186,7 +187,20 @@ TEST_CASE("task_pool/2", "task_pool add large amount of tasks") {
   CHECK(std::accumulate(std::begin(v), std::end(v), 0.0) == 2 * v.size());
 }
 
-TEST_CASE("task_pool/3", "return value of function from task_pool") {
+TEST_CASE("task_pool/3", "adding tasks, then waiting for and then re-add") {
+  std::atomic<int> i (0);
+  auto worker = [&] () { ++i; };
+  bam::task_pool pool;
+  pool.add(worker);
+  pool.add(worker);
+  pool.wait();
+  pool.add(worker);
+  pool.add(worker);
+  pool.wait_and_finish();
+  CHECK(i.load() == 4);
+}
+
+TEST_CASE("task_pool/4", "return value of function from task_pool") {
   bam::task_pool pool;
   auto ret1 = pool.add([] () { return 1; });
   auto ret2 = pool.add([] () { return 2; });
@@ -194,7 +208,7 @@ TEST_CASE("task_pool/3", "return value of function from task_pool") {
   CHECK(ret2.get() == 2);
 }
 
-TEST_CASE("task_pool/4", "adding methods which throw") {
+TEST_CASE("task_pool/5", "adding methods which throw") {
   bam::task_pool pool;
   auto ret1 = pool.add([] () { throw std::runtime_error("task_pool excep 1"); });
   auto ret2 = pool.add([] () { throw std::runtime_error("task_pool excep 2"); });
