@@ -13,6 +13,7 @@
 #include <future>
 #include <atomic>
 #include <functional>
+#include <cassert>
 
 namespace bam {
 
@@ -56,6 +57,7 @@ public:
    */
   template<typename function, typename ...Args>
   std::future<typename std::result_of<function(Args...)>::type> add(function&& f, Args&& ...args) {
+    assert(done == false);
     typedef typename std::result_of<function(Args...)>::type return_type;
 
     auto bound_task = std::bind(std::forward<function>(f), std::forward<Args>(args)...);
@@ -68,6 +70,7 @@ public:
 
   //! finish tasks and get ready for new ones
   void wait() {
+    assert(done == false);
     done = true;
 
     for(auto& i : threads)
@@ -89,6 +92,7 @@ public:
 
   //! finish tasks and don't restart threading
   void wait_and_finish() {
+    assert(done == false);
     done = true;
 
     for(auto&& i : threads) {
