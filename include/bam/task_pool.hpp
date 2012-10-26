@@ -54,11 +54,7 @@ public:
 
   //! finish tasks and get ready for new ones
   void wait() {
-    assert(done == false);
-    done = true;
-
-    for(auto& i : threads)
-      i.get();
+    wait_impl();
 
     // make task pool ready to work again after all work has been finished
     done = false;
@@ -75,12 +71,7 @@ public:
 
   //! finish tasks and don't restart threading
   void wait_and_finish() {
-    assert(done == false);
-    done = true;
-
-    for(auto&& i : threads) {
-      i.get();
-    }
+    wait_impl();
   }
 
 private:
@@ -115,6 +106,7 @@ private:
    * @brief waits till all threads have finished
    */
   void wait_impl() {
+    assert(done == false);
     done = true;
 
     for(auto i = 0u; i != threads.size(); ++i) {
