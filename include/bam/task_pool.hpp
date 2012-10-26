@@ -59,14 +59,7 @@ public:
     // make task pool ready to work again after all work has been finished
     done = false;
 
-    try {
-      int thread_id_counter = 0;
-      for(auto&& i : threads)
-        i = std::async(std::launch::async, &task_pool::worker, this, thread_id_counter++);
-    } catch (const std::system_error& err) {
-      done = true;
-      throw;
-    }
+    init_impl();
   }
 
   //! finish tasks and don't restart threading
