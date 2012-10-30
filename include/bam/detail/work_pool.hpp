@@ -87,7 +87,7 @@ private:
         const int queue_size = it.queue.size();
         auto remaining_work = 0;
 
-        // we need to steal at least one function. This is needed for the semaphore signaling meachanism 
+        // we need to steal at least one function. This is needed for the semaphore signalling meachanism 
         if(queue_size == 1) {
           remaining_work = 1;
         }
