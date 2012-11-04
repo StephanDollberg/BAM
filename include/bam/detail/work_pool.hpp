@@ -31,6 +31,24 @@ public:
   }
 
   /**
+   * \brief try to add new task to pool
+   * \param task callable function object which will be added to queue
+   * \return false if queue is not empty, no task will be added in this case
+   */
+  template<typename callable>
+  bool try_push_back(callable&& task) {
+    std::lock_guard<std::mutex> lock(m);
+
+    if(queue.empty()) {
+      queue.push(std::move(task));
+      return true;
+    }
+    else {
+      return false;
+    }
+  }
+
+  /**
    * @brief try_fetch_work
    * @param ret function_wrapper which will be filled with new work if available
    * @param steal_pool std::vector of other work_pools from work can be stolen

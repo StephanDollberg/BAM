@@ -48,6 +48,7 @@ public:
     auto ret = task.get_future();
 
     work[0].push_back(std::move(task)); // profiling needed
+    
     sem.post();
     return ret;
   }
@@ -67,7 +68,7 @@ public:
     wait_impl();
   }
 
-private:
+protected:
   detail::semaphore sem;
   std::atomic<bool> done;
   std::vector<detail::work_pool> work;
