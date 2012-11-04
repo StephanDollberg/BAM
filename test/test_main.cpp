@@ -9,6 +9,7 @@
 #include "../include/bam/parallel_for.hpp"
 #include "../include/bam/parallel_reduce.hpp"
 #include "../include/bam/parallel_invoke.hpp"
+#include "../include/bam/async.hpp"
 #include "../include/bam/task_pool.hpp"
 #include "../include/bam/timer.hpp"
 
@@ -158,7 +159,7 @@ TEST_CASE("parallel_reduce/6", "test exception in worker function") {
   CHECK_THROWS_AS(bam::parallel_reduce<int>(std::begin(v), std::end(v), worker, joiner), std::runtime_error);
 }
 
-TEST_CASE("parallel_invoke", "testing 3 functions") {
+TEST_CASE("parallel_invoke/1", "testing 3 functions") {
   std::vector<int> v { 1, 2, 3 };
   auto foo1 = [&] () { v[0] *= 2; };
   auto foo2 = [&] () { v[1] *= 2; };
@@ -168,6 +169,31 @@ TEST_CASE("parallel_invoke", "testing 3 functions") {
   CHECK(std::accumulate(std::begin(v), std::end(v), 0) == 12);
 }
 
+TEST_CASE("async/1", "testing basic async functionality") {
+  auto fut = bam::async([] { return 42; });
+  CHECK(fut.get() == 42);
+}
+
+TEST_CASE("async/2", "testing std::launch::async behaviour") {
+  std::atomic<int> var(0);
+  auto fut = bam::async([&] { while(!var) { std::this_thread::yield(); }});
+  var = 1;
+  CHECK(var.load() == 1);
+}
+
+TEST_CASE("async/3", "testing std::launch::deferred behaviour") {
+  std::atomic<int> var(0);
+  auto fut = bam::async(std::launch::deferred, [&] { var = 1; });
+  std::this_thread::sleep_for(std::chrono::milliseconds(10));
+  CHECK(var.load() == 0);
+}
+
+TEST_CASE("async/4", "testing unblocking behaviour on std::launch::async") {
+  std::atomic<int> var(0);
+  bam::async([&] { while(!var) { std::this_thread::yield(); }});
+  var = 1;
+  CHECK(var.load() == 1);
+}
 
 TEST_CASE("task_pool/1", "task_pool add one task") {
   std::vector<int> v(1, 1);
