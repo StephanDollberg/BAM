@@ -153,6 +153,43 @@ This example shows the very basics when using \texttt{bam::parallel\_reduce}. At
 
 In this example we want to find the biggest element in a given range. Therefore we use the new C++11 standard function \texttt{std::max\_element} as a worker function, however this time we have to provide a custom join function which returns the iterator with the biggest associated element of the two given iterators.
 
+\section{async}
+\subsection{async}
+\texttt{bam::async} is a replacement for \texttt{std::async}. It fixes some of the mistakes made in \texttt{std::async}, which will probably be fixed in forthcoming standards. 
+
+\subsubsection{ Non-Blocking \texttt{std::future} on \texttt{std::launch::async} invocation }
+
+\begin{lstlisting}
+  std::atomic<bool> var(true);
+  auto deadlocker = [&] { while(var) { std::this_thread::yield(); }}
+  bam::async(std::launch::async, deadlocker);
+  var = false;
+\end{lstlisting}
+
+The above example would deadlock if one used \texttt{std::async} instead of \texttt{bam::async}. 
+
+\subsubsection{ Backed by a task\_pool on all implementations}
+
+If you launch \texttt{bam::async} with either \texttt{std::launch::async | std::launch::deferred} or with none launch policy specified the task will be run asynchronously or deferred backed by a task\_pool. This is a fix for implementations which don't offer this by default(e.g. gcc). 
+
+You might ask what the "or" means? This just means that the implementation will start the task asynchronously as long there is a free thread in internal managing scheduler, if there are no threads available, the task will be started as \texttt{std::launch::deferred}. This behavior is needed to make recursive invocations of \texttt{bam::async} not deadlock. Using \texttt{std::launch::async} creates a "fire and forget" task which you shouldn't use recursively as that might deadlock the implementation.
+
+\subsubsection{ Different launch behaviors} 
+
+\begin{lstlisting}
+  auto worker = [] { std::cout << "hi from async" << std::endl;};
+  // will launch asynchronously in task_pool
+  bam::async(std::launch::async, worker); 
+  // will launch asynchronously or deferred
+  bam::async(worker);
+  // same as above
+  bam::async(std::launch::async | std::launch::deferred, worker);
+  // same as std::async(std::launch::deferred, worker)
+  bam::async(std::launch::deferred, worker); 
+
+
+\end{lstlisting}
+
 \section{Task Pool}
 \subsection{ Basic Task Pool}
 
@@ -162,9 +199,6 @@ The class offers the following interface:\\
 \begin{lstlisting}
 
   task_pool();
-
-  template<typename function>
-  std::future<typename std::result_of<function()>::type> add(function&& f);
 
   template<typename function, typename ...Args>
   std::future<typename std::result_of<function(Args...)>::type> add(function&& f, Args&& ...args);
