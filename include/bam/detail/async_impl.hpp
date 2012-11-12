@@ -17,8 +17,8 @@ namespace bam { namespace detail {
  * @brief get static thread pool in template
  */
 inline bam::detail::async_task_pool& get_pool() {
-	static bam::detail::async_task_pool pool;
-	return pool;
+  static bam::detail::async_task_pool pool;
+  return pool;
 }
 
 /**
@@ -29,27 +29,27 @@ inline bam::detail::async_task_pool& get_pool() {
  */
 template<typename Foo, typename ...Args>
 std::future<typename std::result_of<Foo(Args...)>::type> async_impl(std::launch policy, Foo&& foo, Args&& ...args) {
-	bam::detail::async_task_pool& pool = get_pool();
-	
-	if(static_cast<int>(policy ^ (std::launch::async | std::launch::deferred))  == 0) {
-		// we need to do this to avoid recursive deadlock
-		auto tuple = pool.try_add(std::forward<Foo>(foo), std::forward<Args>(args)...);
-		if(std::get<0>(tuple)) {
-			return std::move(std::get<1>(tuple));
-		}
-		else {
-			return std::async(std::launch::deferred, std::forward<Foo>(foo), std::forward<Args>(args)...);
-		}
-	}
-	else if (static_cast<int>(policy & std::launch::async) != 0) {
-		return pool.add(std::forward<Foo>(foo), std::forward<Args>(args)...);
-	}
-	else if (static_cast<int>(policy & std::launch::deferred) != 0) {
-		return std::async(std::launch::deferred, std::forward<Foo>(foo), std::forward<Args>(args)...);
-	}
-	else {
-		return pool.add(std::forward<Foo>(foo), std::forward<Args>(args)...);
-	}
+  bam::detail::async_task_pool& pool = get_pool();
+
+  if(static_cast<int>(policy ^ (std::launch::async | std::launch::deferred))  == 0) {
+      // we need to do this to avoid recursive deadlock
+    auto tuple = pool.try_add(std::forward<Foo>(foo), std::forward<Args>(args)...);
+    if(std::get<0>(tuple)) {
+      return std::move(std::get<1>(tuple));
+    }
+    else {
+      return std::async(std::launch::deferred, std::forward<Foo>(foo), std::forward<Args>(args)...);
+    }
+  }
+  else if (static_cast<int>(policy & std::launch::async) != 0) {
+    return pool.add(std::forward<Foo>(foo), std::forward<Args>(args)...);
+  }
+  else if (static_cast<int>(policy & std::launch::deferred) != 0) {
+    return std::async(std::launch::deferred, std::forward<Foo>(foo), std::forward<Args>(args)...);
+  }
+  else {
+    return pool.add(std::forward<Foo>(foo), std::forward<Args>(args)...);
+  }
 }
 
 

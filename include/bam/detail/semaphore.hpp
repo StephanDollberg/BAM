@@ -13,46 +13,46 @@ namespace bam { namespace detail {
 class semaphore {
 public:
 
-	/** 
-	 * @brief creates semaphore with a default counter of 0
-	 */
-	semaphore() : counter(0) {}
-	
-	/** 
-	 * @brief creates semaphore with a given start counter
-	 * @param start_counter initial counter value
-	 */
-	semaphore(int start_counter) : counter(start_counter) {
-		assert(start_counter >= 0);
-	}
+  /**
+   * @brief creates semaphore with a default counter of 0
+   */
+  semaphore() : counter(0) {}
 
-	/**
-	 * @brief raises counter and notifies one waiting thread 
-	 */
-	void post() {
-		std::unique_lock<std::mutex> lock(mutex);
-		++counter;
-		lock.unlock();
-		cond_var.notify_one();
-	}
+  /**
+   * @brief creates semaphore with a given start counter
+   * @param start_counter initial counter value
+   */
+  semaphore(int start_counter) : counter(start_counter) {
+    assert(start_counter >= 0);
+  }
 
-	/**
-	 * @brief decreases counter, blocks if counter is zero
-	 */
-	void wait() {
-		std::unique_lock<std::mutex> lock(mutex);
+  /**
+   * @brief raises counter and notifies one waiting thread
+   */
+  void post() {
+    std::unique_lock<std::mutex> lock(mutex);
+    ++counter;
+    lock.unlock();
+    cond_var.notify_one();
+  }
 
-		auto predicate = [&] () { return counter; };
+  /**
+   * @brief decreases counter, blocks if counter is zero
+   */
+  void wait() {
+    std::unique_lock<std::mutex> lock(mutex);
 
-		cond_var.wait(lock, predicate);
+    auto predicate = [&] () { return counter; };
 
-		--counter;
-	}
+    cond_var.wait(lock, predicate);
+
+    --counter;
+  }
 
 private:
-	std::condition_variable cond_var;
-	std::mutex mutex;
-	int counter;
+  std::condition_variable cond_var;
+  std::mutex mutex;
+  int counter;
 };
 
 

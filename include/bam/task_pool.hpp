@@ -22,7 +22,7 @@ namespace bam {
 class task_pool {
 public:
   task_pool() : sem(0), done(false), work(detail::get_threadcount()), threads(detail::get_threadcount()) {
-    init_impl();
+    init_impl();   
   }
 
   ~task_pool() {

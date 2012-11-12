@@ -18,7 +18,7 @@ namespace bam {
  */
 template<typename Foo, typename ...Args, typename std::enable_if<!std::is_enum<Foo>::value, int>::type = 0    > 
 std::future<typename std::result_of<Foo(Args...)>::type> async(Foo&& foo, Args&& ...args) {
-	return detail::async_impl(std::launch::async | std::launch::deferred, std::forward<Foo>(foo), std::forward<Args>(args)... );
+  return detail::async_impl(std::launch::async | std::launch::deferred, std::forward<Foo>(foo), std::forward<Args>(args)... );
 }
 
 /**
@@ -30,7 +30,7 @@ std::future<typename std::result_of<Foo(Args...)>::type> async(Foo&& foo, Args&&
  */
 template<typename Foo, typename ...Args>
 std::future<typename std::result_of<Foo(Args...)>::type> async(std::launch policy, Foo&& foo, Args&& ...args) {
-	return detail::async_impl(policy, std::forward<Foo>(foo), std::forward<Args>(args)... );
+  return detail::async_impl(policy, std::forward<Foo>(foo), std::forward<Args>(args)... );
 }
 
 }
