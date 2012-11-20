@@ -36,6 +36,13 @@
 \date{\today}
 \maketitle
 
+\begin{abstract}
+BAM is a Concurrency library for C++, which seeks for simplicity in both usage and installation. It's header only, so you can just drop it in your working dir and start crunching.\\
+BAM is thought to be a simple replacement for TBB or PPL. It embodies the same spirit found in both of these libraries - namely task parallelism. In addition BAM tries hard to stick to the \texttt{std::} interface such that you can just replace your old \texttt{std::for\_each} with an all new fancy \texttt{bam::parallel\_for\_each}. The workstealing scheduler will do the rest for you. 
+\end{abstract}
+
+\tableofcontents
+
 \section{parallel constructs}
 bam::parallel constructs offer simplistic parallel replacements for standard library algorithms like \textsc{std::for\_each}.
 \\\\All Parallel-Algorithms share a typical interface. They all take a range, a worker function and a grainsize parameter. 
@@ -51,7 +58,7 @@ void parallel_for(ra_iter begin, ra_iter end, worker_predicate worker, int grain
 \end{lstlisting}
 \texttt{bam::parallel\_for} is a template which is the parallel replacement for a basic for-loop. Its use is pretty simple and straight forward, the following example should make it quite clear.
 
-\subsubsection{Example 1: }
+\subsubsection{Example 1: Compute each element in a vector}
 
 \begin{lstlisting} 
   typedef std::vector<int> container;
@@ -77,7 +84,7 @@ void parallel_for_each(ra_iter begin, ra_iter end, worker_predicate worker, int 
 
 \texttt{bam::parallel\_for\_each} is the replacement for \texttt{std::for\_each}. It functions the very same as the original does and basically all you have to do is to replace the name. The following example shows a simple use case.
 
-\subsubsection{Example 1: Compute}
+\subsubsection{Example 1: Compute improved}
 \begin{lstlisting}
   typedef std::vector<int> container;
   typedef container::iterator iter;
