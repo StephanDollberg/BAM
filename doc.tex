@@ -27,6 +27,8 @@
   breaklines=true,                
 }
 
+\newcommand{\sectionbreak}{\clearpage}
+
 
 \begin{document}
 \title{\bf\color{DarkOrchid}BAM!\\
@@ -179,7 +181,7 @@ The above example would deadlock if one used \texttt{std::async} instead of \tex
 
 If you launch \texttt{bam::async} with either \texttt{std::launch::async | std::launch::deferred} or with none launch policy specified the task will be run asynchronously or deferred backed by a task\_pool. This is a fix for implementations which don't offer this by default(e.g. gcc). 
 
-You might ask what the "or" means? This just means that the implementation will start the task asynchronously as long there is a free thread in internal managing scheduler, if there are no threads available, the task will be started as \texttt{std::launch::deferred}. This behavior is needed to make recursive invocations of \texttt{bam::async} not deadlock. Using \texttt{std::launch::async} creates a "fire and forget" task which you shouldn't use recursively as that might deadlock the implementation.
+You might ask what the "or" means? This just means that the implementation will start the task asynchronously as long as there is a free thread in the internal managing scheduler, if there are no threads available, the task will be started as \texttt{std::launch::deferred}. This behavior is needed to make recursive invocations of \texttt{bam::async} not deadlock. Using \texttt{std::launch::async} creates a "fire and forget" task which you shouldn't use recursively as that might deadlock the implementation.
 
 \subsubsection{ Different launch behaviors} 
 
