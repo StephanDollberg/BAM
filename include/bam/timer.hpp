@@ -19,10 +19,12 @@ private:
 public:
   typedef resolution resolution_type;
 
+  const static bool is_steady = std::chrono::high_resolution_clock::is_steady;
+
   /**
    * @brief timer starts timer
    */
-  timer() : start_point(std::chrono::high_resolution_clock::now()), last_epoch(std::chrono::high_resolution_clock::now()) {}
+  timer() : start_point(std::chrono::high_resolution_clock::now()), last_epoch(start_point) {}
 
   /**
    * \brief returns the passed time since the creation of the timer
@@ -40,7 +42,6 @@ public:
     last_epoch = std::chrono::high_resolution_clock::now();
     return std::chrono::duration_cast<resolution>(std::chrono::high_resolution_clock::now() - ret).count();
   }
-
 };
 
 //! typedef as default timer

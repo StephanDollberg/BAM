@@ -1,6 +1,8 @@
 #ifndef UTILITY_HPP
 #define UTILITY_HPP
 
+#include <memory>
+
 namespace bam {
 
 // make_unique by Herb Sutter http://herbsutter.com/gotw/_102/

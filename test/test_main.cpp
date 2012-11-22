@@ -13,6 +13,7 @@
 #include "../include/bam/task_pool.hpp"
 #include "../include/bam/timer.hpp"
 
+#include <numeric>
 #include <vector>
 #include <algorithm>
 #include <exception>
@@ -143,7 +144,7 @@ TEST_CASE("parallel_reduce/4", "parallel_reduce on 1 element range") {
 }
 
 TEST_CASE("parallel_reduce/5", "parallel_reduce on negative elements range") {
-  auto worker = [] (int begin, int end) { int ret = 0; for(int i = begin; i != end; ++i) ret += i; return ret; };
+  auto worker = [] (int begin, int end) -> int { int ret = 0; for(int i = begin; i != end; ++i) ret += i; return ret; };
   auto joiner = [] (int a, int b) { return a + b; };
   int begin = -100;
   int end = 0;
