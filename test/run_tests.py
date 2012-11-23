@@ -23,6 +23,15 @@ def get_all_files():
 
     return filtered_files
 
+# prepares passed file arguments to match real files
+def prepare_files(files):
+    def mapper(item):
+        return item + '_test.cpp'
+
+    prepared_files = map(mapper, files)
+
+    return prepared_files
+
 # reads compiler option form command line args
 def make_compiler(args):
     return args.compiler 
@@ -45,6 +54,8 @@ def make_error_flags():
 def make_compile(files):
     if len(files) == 0:
         files = get_all_files()
+
+    files = prepare_files(files)
 
     name = make_name()
     return ['-o', name, 'test_runner.cpp'] + files
