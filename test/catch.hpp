@@ -1263,21 +1263,21 @@ namespace Internal
     }
 
     // long to unsigned X
-    template<Operator Op> bool compare( long lhs, unsigned int rhs )
+    template<Operator Op> bool compare( long lhs, unsigned int  )
     {
         return applyEvaluator<Op>( static_cast<unsigned long>( lhs ) );
     }
-    template<Operator Op> bool compare( long lhs, unsigned long rhs )
+    template<Operator Op> bool compare( long lhs, unsigned long  )
     {
         return applyEvaluator<Op>( static_cast<unsigned long>( lhs ) );
     }
-    template<Operator Op> bool compare( long lhs, unsigned char rhs )
+    template<Operator Op> bool compare( long lhs, unsigned char  )
     {
         return applyEvaluator<Op>( static_cast<unsigned long>( lhs ) );
     }
 
     template<Operator Op, typename T>
-    bool compare( long lhs, const T* rhs )
+    bool compare( long, const T* rhs )
     {
         return Evaluator<T*, T*, Op>::evaluate( reinterpret_cast<T*>( NULL ), rhs );
 
