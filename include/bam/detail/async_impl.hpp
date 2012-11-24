@@ -31,7 +31,7 @@ template<typename Foo, typename ...Args>
 std::future<typename std::result_of<Foo(Args...)>::type> async_impl(std::launch policy, Foo&& foo, Args&& ...args) {
   bam::detail::async_task_pool& pool = get_pool();
 
-  if(static_cast<int>(policy ^ (std::launch::async | std::launch::deferred))  == 0) {
+  if((policy ^ (std::launch::async | std::launch::deferred))  == std::launch()) {
       // we need to do this to avoid recursive deadlock
     auto tuple = pool.try_add(std::forward<Foo>(foo), std::forward<Args>(args)...);
     if(std::get<0>(tuple)) {
@@ -41,10 +41,10 @@ std::future<typename std::result_of<Foo(Args...)>::type> async_impl(std::launch 
       return std::async(std::launch::deferred, std::forward<Foo>(foo), std::forward<Args>(args)...);
     }
   }
-  else if (static_cast<int>(policy & std::launch::async) != 0) {
+  else if ((policy & std::launch::async) != std::launch()) {
     return pool.add(std::forward<Foo>(foo), std::forward<Args>(args)...);
   }
-  else if (static_cast<int>(policy & std::launch::deferred) != 0) {
+  else if ((policy & std::launch::deferred) != std::launch()) {
     return std::async(std::launch::deferred, std::forward<Foo>(foo), std::forward<Args>(args)...);
   }
   else {
