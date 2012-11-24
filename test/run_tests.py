@@ -54,8 +54,8 @@ def make_error_flags():
 def make_compile(files):
     if len(files) == 0:
         files = get_all_files()
-
-    files = prepare_files(files)
+    else:
+        files = prepare_files(files)
 
     name = make_name()
     return ['-o', name, 'test_runner.cpp'] + files
@@ -75,7 +75,7 @@ def make_compile_options(args):
 # actual main function, creates compile args and then compiles and runs
 def main():
     parser = argparse.ArgumentParser(description="bam test runner")
-    parser.add_argument('--compiler', nargs='+', help='enter the compiler to use', default = ['clang++'], dest='compiler')
+    parser.add_argument('--compiler', nargs='+', help='enter the compiler to use', default = ['g++'], dest='compiler')
     parser.add_argument('--files', nargs='+', help='enter the files which you want to test, non == all', default =[], dest='files')
 
     args = parser.parse_args()
