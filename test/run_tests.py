@@ -34,6 +34,7 @@ def prepare_files(files):
 
 # reads compiler option form command line args
 def make_compiler(args):
+    print args.compiler,
     return args.compiler 
 
 # creates standard and standard library flags
@@ -43,6 +44,8 @@ def make_standard_flags(args):
 
     if compiler == 'clang++':
         standard_flags.append('-stdlib=libc++')
+
+    print standard_flags,
 
     return standard_flags
 
@@ -56,6 +59,9 @@ def make_compile(files):
         files = get_all_files()
     else:
         files = prepare_files(files)
+
+    print ''
+    print 'using files', files
 
     name = make_name()
     return ['-o', name, 'test_runner.cpp'] + files
@@ -80,10 +86,15 @@ def main():
 
     args = parser.parse_args()
 
+    print 'compiling ...'
+    print 'using', 
+
     options = make_compile_options(args)
     name = make_name()
-
+    
     if subprocess.call(options) == 0:
+        print 'compiled successfully ...'
+        print 'running tests now ...'
         subprocess.call(['./' + name])
         subprocess.call(['rm', '-rf', name])
 
