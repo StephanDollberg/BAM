@@ -70,13 +70,17 @@ def make_compile(files):
 def make_defines():
     return ['-D_GLIBCXX_USE_SCHED_YIELD', '-D_GLIBCXX_USE_NANOSLEEP']
 
+# adds extra needed flags like pthread
+def make_extra_flags():
+    return ['-pthread']
+
 # creates optimization options
 def make_optimization():
     return ['-O2']
 
 # combines all options
 def make_compile_options(args):
-    return make_compiler(args) + make_standard_flags(args) + make_error_flags() + make_defines() + make_optimization() + make_compile(args.files)
+    return make_compiler(args) + make_standard_flags(args) + make_error_flags() + make_extra_flags() + make_defines() + make_optimization() + make_compile(args.files)
 
 # actual main function, creates compile args and then compiles and runs
 def main():
