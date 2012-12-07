@@ -104,7 +104,6 @@ Taking up the \texttt{bam::parallel\_for} example and making it yet even easier,
 \\\\The interface is definied as followed:
 \begin{lstlisting}
 template<
-typename return_type, 
 typename ra_iter, 
 typename predicate, 
 typename join_predicate, 
@@ -137,12 +136,12 @@ The interface is quite big but mighty, the following examples will explain diffe
   std::function<int(iter, iter)> accumulate_wrapper = 
      std::bind(std::accumulate<iter, int>, _1, _2, 0);
 
-  int result = bam::parallel_reduce<int>(std::begin(v), std::end(v), accumulate_wrapper, std::plus<int>());
+  int result = bam::parallel_reduce(std::begin(v), std::end(v), accumulate_wrapper, std::plus<int>());
 
   std::cout << result << std::endl; // prints 21
 \end{lstlisting}
 
-This example shows the very basics when using \texttt{bam::parallel\_reduce}. At first we are creating a vector whose elements we want to accumulate in parallel. Then we define a wrapper, which calls \texttt{std::accumulate} as we can't just pass \texttt{std::accumulate} to our algorithm as that one can't provide the third parameter to \texttt{std::accumulate} which is needed for type deduction. In our call to \texttt{bam::parallel\_reduce} we do explicitly name the return type as, that can't be deduced from the template arguments. We then pass our range in form of the iterators, our function to work on, the accumulate wrapper, the \texttt{std::plus<int>} functor which is the needed join function to combine the splitted parts which the different threads are handling. 
+This example shows the very basics when using \texttt{bam::parallel\_reduce}. At first we are creating a vector whose elements we want to accumulate in parallel. Then we define a wrapper, which calls \texttt{std::accumulate} as we can't just pass \texttt{std::accumulate} to our algorithm as that one can't provide the third parameter to \texttt{std::accumulate} which is needed for type deduction. We then pass our range in form of the iterators, our function to work on, the accumulate wrapper, the \texttt{std::plus<int>} functor which is the needed join function to combine the splitted parts which the different threads are handling. 
 
 \subsubsection{Example 2: Find Max}
 \begin{lstlisting}
@@ -155,7 +154,7 @@ This example shows the very basics when using \texttt{bam::parallel\_reduce}. At
       return *a > *b ? a : b;
   };
 
-  iter result = bam::parallel_reduce<iter>(std::begin(v), std::end(v), std::max_element<iter>, join_max_helper);
+  auto result = bam::parallel_reduce(std::begin(v), std::end(v), std::max_element<iter>, join_max_helper);
 
   std::cout << *result << std::endl; // prints 6
 \end{lstlisting}
