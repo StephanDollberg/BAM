@@ -5,13 +5,7 @@
 #ifndef BAM_PARALLEL_REDUCE_HPP
 #define BAM_PARALLEL_REDUCE_HPP
 
-#include "detail/work_range.hpp"
 #include "detail/parallel_utility.hpp"
-#include "utility.hpp"
-
-#include <vector>
-#include <list>
-#include <future>
 #include <iterator>
 
 namespace bam {
@@ -30,31 +24,19 @@ auto parallel_reduce(ra_iter begin, ra_iter end, worker_predicate worker, join_p
       join_predicate(typename std::result_of<worker_predicate(ra_iter, ra_iter)>::type, typename std::result_of<worker_predicate(ra_iter, ra_iter)>::type)
     >::type 
 {
-  typedef typename std::result_of<
-      join_predicate(typename std::result_of<worker_predicate(ra_iter, ra_iter)>::type, typename std::result_of<worker_predicate(ra_iter, ra_iter)>::type)
-    >::type return_type;
+  typedef typename std::result_of<worker_predicate(ra_iter, ra_iter)>::type worker_return_type;
+  typedef typename std::result_of<join_predicate(worker_return_type, worker_return_type)>::type return_type;
 
-  // get all the parameters like threadcount, grainsize and work per thread
-  auto threadcount = detail::get_threadcount(end - begin);
+  // get params work_piece_per_thread and grainsize
+  auto work_piece_per_thread = 0;
+  std::tie(grainsize, work_piece_per_thread) = detail::get_scheduler_params(end - begin, grainsize);
 
-  if(threadcount == 0)
+  if(work_piece_per_thread == 0) {
     return worker(begin, end);
-
-  if(grainsize == 0) {
-    grainsize = detail::get_grainsize(end - begin, threadcount);
   }
-  auto work_piece_per_thread = (end - begin) / threadcount;
 
-  // vectors to store work, results and the threads
-  std::list<detail::work_range<ra_iter>> work;
-  std::vector<std::future<return_type>> threads;
-
-  // build the work for each thread
-  auto counter = begin;
-  for(; counter < end - work_piece_per_thread; counter += work_piece_per_thread) {
-    work.emplace_back(counter, counter + work_piece_per_thread, grainsize);
-  }
-  work.emplace_back(counter, end, grainsize);
+  // create work
+  auto work = detail::make_work(begin, end, work_piece_per_thread, grainsize);
 
   // helper function
   auto work_helper = [&] (typename std::list<detail::work_range<ra_iter>>::iterator thread_iter) -> return_type {
@@ -73,16 +55,15 @@ auto parallel_reduce(ra_iter begin, ra_iter end, worker_predicate worker, join_p
     return ret;
   };
 
-  // spawn threads
-  for(auto it = std::begin(work); it != std::end(work); ++it) {
-    threads.emplace_back(std::async(std::launch::async, work_helper, it));
-  }
+  // start runner tasks
+  auto threads = detail::spawn_tasks(std::begin(work), std::end(work), work_helper);
 
   // join results
   auto result = std::begin(threads)->get();
   for(auto it = std::begin(threads) + 1; it != std::end(threads); ++it) {
     result = joiner(result, it->get());
   }
+
   return result;
 }
 

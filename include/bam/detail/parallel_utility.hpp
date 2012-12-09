@@ -5,7 +5,11 @@
 #ifndef BAM_PARALLEL_UTILITY_HPP
 #define BAM_PARALLEL_UTILITY_HPP
 
+#include "work_range.hpp"
 #include <thread>
+#include <vector>
+#include <list>
+#include <future>
 
 namespace bam { namespace detail {
 
@@ -51,6 +55,57 @@ int get_threadcount(distance rangesize) {
   }
 
   return threadcount;
+}
+
+/**
+ * @brief returns grainsize, work_piece_per_thread
+ */
+template<typename distance>
+std::tuple<int, int> get_scheduler_params(distance dist, int grainsize) {
+    // get all the parameters like threadcount, grainsize and work per thread
+  auto threadcount = detail::get_threadcount(dist);
+
+  if(grainsize == 0) {
+    grainsize = detail::get_grainsize(dist, threadcount);
+  }
+  auto work_piece_per_thread = threadcount ? dist / threadcount : 0;
+
+  return {grainsize, work_piece_per_thread};
+}
+
+/**
+ * @brief builds work with given range and work per thread
+ */
+template<typename range_iter>
+std::list<work_range<range_iter>> make_work(range_iter begin, range_iter end, int initial_work_per_thread, int grainsize) {
+  std::list<work_range<range_iter>> work;
+  
+  auto counter = begin;
+  for(; counter < end - initial_work_per_thread; counter += initial_work_per_thread) {
+    work.emplace_back(counter, counter + initial_work_per_thread, grainsize);
+  }
+  work.emplace_back(counter, end, grainsize);
+
+  return work;
+}
+
+template<typename work_iter, typename worker_foo>
+auto spawn_tasks(work_iter begin, work_iter end, worker_foo&& foo) 
+  -> std::vector<std::future<typename std::result_of<worker_foo(work_iter)>::type>>
+{
+  std::vector<std::future<typename std::result_of<worker_foo(work_iter)>::type>> threads;
+  for(auto it = begin; it != end; ++it) {
+    threads.emplace_back(std::async(std::launch::async, foo, it));
+  }
+
+  return threads;
+}
+
+template<typename iter>
+void get_tasks(iter begin, iter end) {
+  for(auto it = begin; it != end; ++it) {
+    it->get();
+  }
 }
 
 } }

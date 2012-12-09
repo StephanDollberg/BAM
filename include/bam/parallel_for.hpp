@@ -2,18 +2,11 @@
 // Software License, Version 1.0. (See accompanying file
 // LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
-#ifndef BAM_PARALLEL_FOR_H
-#define BAM_PARALLEL_FOR_H
+#ifndef BAM_PARALLEL_FOR_HPP
+#define BAM_PARALLEL_FOR_HPP
 
-#include "detail/work_range.hpp"
 #include "detail/parallel_utility.hpp"
-#include "utility.hpp"
-
-#include <list>
-#include <vector>
-#include <memory>
 #include <iterator>
-#include <future>
 
 namespace bam {
 
@@ -26,28 +19,16 @@ namespace bam {
  */
 template<typename ra_iter, typename worker_predicate>
 void parallel_for(ra_iter begin, ra_iter end, worker_predicate worker, int grainsize = 0) {
-  // sets all parameters like threadcount, grainsize and work per thread
-  auto threadcount = detail::get_threadcount(end - begin);
-  if(threadcount == 0)
+  // get params work_piece_per_thread and grainsize
+  auto work_piece_per_thread = 0;
+  std::tie(grainsize, work_piece_per_thread) = detail::get_scheduler_params(end - begin, grainsize);
+
+  if(work_piece_per_thread == 0) {
     return;
-
-  if(grainsize == 0) {
-    grainsize = detail::get_grainsize(end - begin, threadcount);
   }
 
-  auto work_piece_per_thread = (end - begin) / threadcount;
-
-  // vectors to store the threads and work per thread
-  std::list<detail::work_range<ra_iter>> work;
-  std::vector<std::future<void>> threads;
-
-  // build the work for each thread
-  auto counter = begin;
-  for(; counter < end - work_piece_per_thread; counter += work_piece_per_thread) {
-    work.emplace_back(counter, counter + work_piece_per_thread, grainsize);
-  }
-  work.emplace_back(counter, end, grainsize);
-
+  // build work
+  auto work = detail::make_work(begin, end, work_piece_per_thread, grainsize);
 
   // helper function which the threads will run
   auto work_helper = [&] (typename std::list<detail::work_range<ra_iter>>::iterator thread_iter) {
@@ -57,16 +38,12 @@ void parallel_for(ra_iter begin, ra_iter end, worker_predicate worker, int grain
     }
   };
 
-  // spawn threads
-  for(auto it = std::begin(work); it != std::end(work); ++it) {
-    threads.emplace_back(std::async(std::launch::async, work_helper, it));
-  }
+  // spawn tasks
+  auto tasks = spawn_tasks(std::begin(work), std::end(work), work_helper);
 
-  // rethrow exceptions
-  for(auto&& i : threads) {
-    i.get();
-  }
+  // get tasks & rethrow
+  detail::get_tasks(std::begin(tasks), std::end(tasks));
 }
 }
 
-#endif // bam_PARALLEL_FOR_H
+#endif // bam_PARALLEL_FOR_HPP
