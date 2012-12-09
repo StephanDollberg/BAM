@@ -10,6 +10,7 @@
 #include <vector>
 #include <list>
 #include <future>
+#include <iostream>
 
 namespace bam { namespace detail {
 
@@ -20,7 +21,11 @@ namespace bam { namespace detail {
  */
 template<typename distance>
 int get_grainsize(distance range_size, int threadcount) {
-  auto work_per_thread = range_size / threadcount;
+  auto work_per_thread = threadcount ? range_size / threadcount : 0;
+
+  if(work_per_thread == 0) {
+    return 0;
+  }
 
   if(work_per_thread / 100 > 0)
     return work_per_thread / 100;
@@ -70,7 +75,7 @@ std::tuple<int, int> get_scheduler_params(distance dist, int grainsize) {
   }
   auto work_piece_per_thread = threadcount ? dist / threadcount : 0;
 
-  return {grainsize, work_piece_per_thread};
+  return std::make_tuple(grainsize, work_piece_per_thread);
 }
 
 /**

@@ -7,6 +7,7 @@
 
 #include "detail/parallel_utility.hpp"
 #include <iterator>
+#include <algorithm>
 
 namespace bam {
 
