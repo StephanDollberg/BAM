@@ -10,14 +10,19 @@
 #include "detail/function_wrapper.hpp"
 #include "detail/semaphore.hpp"
 
-
 #include <vector>
 #include <future>
 #include <atomic>
 #include <functional>
 #include <cassert>
 
+
 namespace bam {
+
+// forward declaration needed for friend  
+namespace detail {
+  class async_task_pool;
+}
 
 class task_pool {
 public:
@@ -68,11 +73,11 @@ public:
     wait_impl();
   }
 
-protected:
+private:
   detail::semaphore sem;
   std::atomic<bool> done;
   std::vector<detail::work_pool> work;
-  std::vector<std::future<void> > threads;
+  std::vector<std::future<void>> threads;
 
   /**
    * @brief worker helper function the threads will run
@@ -126,8 +131,10 @@ protected:
       throw;
     }
   }
-};
 
+  // my fellow friends
+  friend class detail::async_task_pool;  
+};
 }
 
 #endif // BAM_TASK_POOL_HPP
