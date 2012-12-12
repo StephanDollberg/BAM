@@ -33,7 +33,7 @@ void parallel_for_each(ra_iter begin, ra_iter end, worker_predicate worker, int 
   auto work = detail::make_work(begin, end, work_piece_per_thread, grainsize);
 
   // helper function which the threads will run
-  auto work_helper = [&] (typename std::list<detail::work_range<ra_iter>>::iterator thread_iter) {
+  auto work_helper = [&] (typename decltype(work)::iterator thread_iter) {
     std::pair<ra_iter, ra_iter> work_chunk;
     while(thread_iter->try_fetch_work(work_chunk, work)) {
       std::for_each(work_chunk.first, work_chunk.second, worker);

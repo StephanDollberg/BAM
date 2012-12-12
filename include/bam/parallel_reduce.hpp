@@ -39,7 +39,7 @@ auto parallel_reduce(ra_iter begin, ra_iter end, worker_predicate worker, join_p
   auto work = detail::make_work(begin, end, work_piece_per_thread, grainsize);
 
   // helper function
-  auto work_helper = [&] (typename std::list<detail::work_range<ra_iter>>::iterator thread_iter) -> return_type {
+  auto work_helper = [&] (typename decltype(work)::iterator thread_iter) -> return_type {
     return_type ret = return_type();
     std::pair<ra_iter, ra_iter> work_chunk;
 
