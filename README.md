@@ -10,9 +10,9 @@ It is thought to simplify multithreading and act as a lightweight alternative to
     #include <iterator>
 
     int main() {
-        auto computer_the_answer = [] (int& x) { x = 42; };
+        auto compute_the_answer = [] (int& x) { x = 42; };
         std::vector<int> v{1, 2, 3, 4, 5, 6};
-        bam::parallel_for_each(std::begin(v), std::end(v), computer_the_answer);
+        bam::parallel_for_each(std::begin(v), std::end(v), compute_the_answer);
     }
 
 #What does it offer?
