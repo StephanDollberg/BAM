@@ -60,9 +60,6 @@ def make_compile(files):
     else:
         files = prepare_files(files)
 
-    print ''
-    print 'using files', files
-
     name = make_name()
     return ['-o', name, 'test_runner.cpp'] + files
 
@@ -71,8 +68,13 @@ def make_defines():
     return ['-D_GLIBCXX_USE_SCHED_YIELD', '-D_GLIBCXX_USE_NANOSLEEP']
 
 # adds extra needed flags like pthread
-def make_extra_flags():
-    return ['-pthread']
+def make_extra_flags(args):
+    def mapper(arg):
+        return "-" + arg
+
+    mapped_args=map(mapper, args.args)
+
+    return ['-pthread'] + mapped_args
 
 # creates optimization options
 def make_optimization():
@@ -80,13 +82,14 @@ def make_optimization():
 
 # combines all options
 def make_compile_options(args):
-    return make_compiler(args) + make_standard_flags(args) + make_error_flags() + make_extra_flags() + make_defines() + make_optimization() + make_compile(args.files)
+    return make_compiler(args) + make_standard_flags(args) + make_error_flags() + make_extra_flags(args) + make_defines() + make_optimization() + make_compile(args.files)
 
 # actual main function, creates compile args and then compiles and runs
 def main():
     parser = argparse.ArgumentParser(description="bam test runner")
     parser.add_argument('--compiler', nargs='+', help='enter the compiler to use', default = ['g++'], dest='compiler')
     parser.add_argument('--files', nargs='+', help='enter the files which you want to test, non == all', default =[], dest='files')
+    parser.add_argument('--args', nargs='+', help='enter additional options which need to be passed to the compiler', default=[], dest='args')
 
     args = parser.parse_args()
 
@@ -95,6 +98,8 @@ def main():
 
     options = make_compile_options(args)
     name = make_name()
+
+    print options
     
     if subprocess.call(options) == 0:
         print 'compiled successfully ...'
