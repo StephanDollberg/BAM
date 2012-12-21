@@ -29,7 +29,7 @@ void parallel_for_each(ra_iter begin, ra_iter end, worker_predicate worker, int 
     return;
   }
 
-  // vectors to store all threads and work for each thread
+  // build work
   auto work = detail::make_work(begin, end, work_piece_per_thread, grainsize);
 
   // helper function which the threads will run
