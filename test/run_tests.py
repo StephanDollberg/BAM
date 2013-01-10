@@ -45,7 +45,6 @@ def make_standard_flags(args):
     if compiler == 'clang++':
         standard_flags.append('-stdlib=libc++')
 
-    print standard_flags,
 
     return standard_flags
 
