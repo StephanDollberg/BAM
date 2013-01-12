@@ -39,7 +39,7 @@ void parallel_for(ra_iter begin, ra_iter end, worker_predicate worker, int grain
   };
 
   // spawn tasks
-  auto tasks = spawn_tasks(std::begin(work), std::end(work), work_helper);
+  auto tasks = detail::spawn_tasks(std::begin(work), std::end(work), work_helper);
 
   // get tasks & rethrow
   detail::get_tasks(std::begin(tasks), std::end(tasks));
