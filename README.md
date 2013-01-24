@@ -38,8 +38,8 @@ Tests are done using the great Catch Testing framework (https://github.com/phils
 
 #Documentation
 
-The documentation can be downloaded on the Download page. The documentation serves as a tutorial which explains all the algorithms and possiblities. It is written with Latex - again to learn the language. The pdf version might be out of date from time to time. You can compile the .tex file to get the newest version.
+The documentation serves as a tutorial which explains all the algorithms and possibilities. It is written with Latex - again to learn the language. You can compile the .tex file to get the newest version.
 
 #Thanks
 
-Thanks go to all the people on stackoverflow.com who help me to learn C++ every day and to Anthony Williams for his wonderfull book C++ Concurrency in Action.
+Thanks go to all the people on stackoverflow.com who help me to learn C++ every day and to Anthony Williams for his wonderful book C++ Concurrency in Action.
