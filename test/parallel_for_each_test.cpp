@@ -34,3 +34,18 @@ TEST_CASE("parallel_for_each/5", "test exception in worker function") {
   auto worker = [] (iter::value_type x) { if(x == 1) throw std::runtime_error("testing exception"); };
   CHECK_THROWS_AS(bam::parallel_for_each(std::begin(v), std::end(v), worker), std::runtime_error);
 }
+
+TEST_CASE("parallel_for_each/6", "testing range overloads") {
+    auto worker = [] (int& x) { x += 1; };
+    std::vector<int> v = {0, 0, 0, 0, 0, 0};
+    bam::parallel_for_each(v, worker);
+    CHECK(std::accumulate(v.begin(), v.end(), 0) == 1 * static_cast<int>(v.size()));
+    bam::parallel_for_each(v, worker, 1);
+    CHECK(std::accumulate(v.begin(), v.end(), 0) == 2 * static_cast<int>(v.size()));
+    bam::parallel_for_each(v.begin(), v.end(), worker);
+    CHECK(std::accumulate(v.begin(), v.end(), 0) == 3 * static_cast<int>(v.size()));
+    bam::parallel_for_each(v.begin(), v.end(), worker, 1);
+    CHECK(std::accumulate(v.begin(), v.end(), 0) == 4 * static_cast<int>(v.size()));
+}
+
+

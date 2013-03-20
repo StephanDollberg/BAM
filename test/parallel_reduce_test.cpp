@@ -1,5 +1,6 @@
 #include "../include/bam/parallel_reduce.hpp"
 #include "catch.hpp"
+#include <numeric>
 
 TEST_CASE("parallel_reduce/1", "parallel_reduce on small range") {
   std::vector<int> v {1, 2, 3, 4, 5, 6};
@@ -54,3 +55,14 @@ TEST_CASE("parallel_reduce/6", "test exception in worker function") {
   auto joiner = [] (int a, int b) -> int { return std::max(a, b); };
   CHECK_THROWS_AS(bam::parallel_reduce(std::begin(v), std::end(v), worker, joiner), std::runtime_error);
 }
+
+TEST_CASE("parallel_reduce/7", "testing range overloads") {
+    std::vector<int> v{1, 2, 3, 4, 5, 6};
+    auto worker = [] (std::vector<int>::iterator b, std::vector<int>::iterator e) { return std::accumulate(b, e, 0); };
+    auto joiner = std::plus<int>();
+    CHECK(bam::parallel_reduce(v, worker, joiner) == std::accumulate(v.begin(), v.end(), 0));
+    CHECK(bam::parallel_reduce(v, worker, joiner, 1) == std::accumulate(v.begin(), v.end(), 0));
+    CHECK(bam::parallel_reduce(v.begin(), v.end(), worker, joiner) == std::accumulate(v.begin(), v.end(), 0));
+    CHECK(bam::parallel_reduce(v.begin(), v.end(), worker, joiner, 1) == std::accumulate(v.begin(), v.end(), 0));
+}
+

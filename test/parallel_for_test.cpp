@@ -1,6 +1,8 @@
 #include "../include/bam/parallel_for.hpp"
 #include "catch.hpp"
 
+#include <boost/range/irange.hpp>
+
 #include <numeric>
 #include <vector>
 
@@ -60,3 +62,21 @@ TEST_CASE("parallel_for/6", "parallel_for excep from worker thread") {
   };
   CHECK_THROWS_AS(bam::parallel_for(std::begin(v), std::end(v), worker), std::runtime_error);
 }
+
+TEST_CASE("parallel_for/7", "testing parallel_for range overloads") {
+    std::vector<int> v{0, 0, 0, 0, 0, 0};
+    auto worker = [&] (int b, int e) {
+        for(int i = b; i != e; ++i) {
+            v[i] += 1;
+        }
+    };
+    bam::parallel_for(boost::irange(0,6), worker);
+    CHECK(std::accumulate(v.begin(), v.end(), 0) == 1 * static_cast<int>(v.size()));
+    bam::parallel_for(boost::irange(0,6), worker, 1);
+    CHECK(std::accumulate(v.begin(), v.end(), 0) == 2 * static_cast<int>(v.size()));
+    bam::parallel_for(0, 6, worker);
+    CHECK(std::accumulate(v.begin(), v.end(), 0) == 3 * static_cast<int>(v.size()));
+    bam::parallel_for(0, 6, worker, 1);
+    CHECK(std::accumulate(v.begin(), v.end(), 0) == 4 * static_cast<int>(v.size()));
+}
+
