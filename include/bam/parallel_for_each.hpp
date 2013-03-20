@@ -13,13 +13,6 @@
 namespace bam {
 
 
-    //! parallel_for algorithm, replacing serial std::for_each loops
-    /**
-     * \param begin begin iterator of the range to be worked on
-     * \param end end iterator of the range to be worked on
-     * \param worker function object predicate which the threads will run to operate on the given range
-     * \param grainsize defines the grainsize, default argument of 0 means that grainsize will be determined on runtime
-     */
     template<typename ra_iter, typename worker_predicate>
     void parallel_for_each_impl(ra_iter begin, ra_iter end, worker_predicate worker, int grainsize) {
 
@@ -49,11 +42,21 @@ namespace bam {
         detail::get_tasks(std::begin(tasks), std::end(tasks));
     }
 
+    //! parallel_for algorithm, replacing serial std::for_each loops
+    /**
+     * \param begin begin iterator of the range to be worked on
+     * \param end end iterator of the range to be worked on
+     * \param worker function object predicate which the threads will run to operate on the given range
+     * \param grainsize defines the grainsize, default argument of 0 means that grainsize will be determined on runtime
+     */
     template<typename ra_iter, typename worker_predicate>
     void parallel_for_each(ra_iter begin, ra_iter end, worker_predicate worker, int grainsize = 0) {
         parallel_for_each_impl(begin, end, std::move(worker), grainsize);
     }
 
+    /**
+     * @brief range wrapper for bam::parallel_for_each
+     */
     template<typename range, typename worker_predicate>
     void parallel_for_each(range& rng, worker_predicate worker, int grainsize = 0) {
         parallel_for_each_impl(boost::begin(rng), boost::end(rng), std::move(worker), grainsize);
