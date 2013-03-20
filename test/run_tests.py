@@ -45,12 +45,11 @@ def make_standard_flags(args):
     if compiler == 'clang++':
         standard_flags.append('-stdlib=libc++')
 
-
     return standard_flags
 
 # creates error flags
 def make_error_flags():
-    return ['-Wall', '-Werror', '-Wextra', '-pedantic-errors']
+    return ['-Wall', '-W', '-Wextra', '-pedantic-errors']
 
 # creates compile options like -o etc
 def make_compile(files):

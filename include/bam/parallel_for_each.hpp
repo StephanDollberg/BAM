@@ -6,10 +6,17 @@
 #define BAM_PARALLEL_FOR_EACH_HPP
 
 #include "detail/parallel_utility.hpp"
+#include <boost/range.hpp>
 #include <iterator>
 #include <algorithm>
 
 namespace bam {
+
+
+    template<typename range, typename worker_predicate>
+    void parallel_for_each(const range& rng, worker_predicate&& worker, int grainsize) {
+        parallel_for_each(boost::begin(rng), boost::end(rng), std::forward(worker), grainsize);
+    }
 
 //! parallel_for algorithm, replacing serial std::for_each loops
 /**
