@@ -8,6 +8,8 @@
 #include "detail/parallel_utility.hpp"
 #include <iterator>
 
+#include <boost/range.hpp>
+
 namespace bam {
 
 //! parallel_for algorithm, replacing serial for loops
@@ -44,6 +46,11 @@ void parallel_for(ra_iter begin, ra_iter end, worker_predicate worker, int grain
   // get tasks & rethrow
   detail::get_tasks(std::begin(tasks), std::end(tasks));
 }
+
+    template<typename range, typename worker_predicate>
+    void parallel_for(const range& rng, worker_predicate worker, int grainsize = 0) {
+        parallel_for(*boost::begin(rng), *boost::end(rng), std::move(worker), grainsize);
+    }
 }
 
 #endif // bam_PARALLEL_FOR_HPP

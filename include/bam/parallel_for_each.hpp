@@ -13,11 +13,6 @@
 namespace bam {
 
 
-    template<typename range, typename worker_predicate>
-    void parallel_for_each(const range& rng, worker_predicate worker, int grainsize) {
-        parallel_for_each(boost::begin(rng), boost::end(rng), std::move(worker), grainsize);
-    }
-
     //! parallel_for algorithm, replacing serial std::for_each loops
     /**
      * \param begin begin iterator of the range to be worked on
@@ -53,6 +48,16 @@ namespace bam {
         // get tasks & rethrow exceptions
         detail::get_tasks(std::begin(tasks), std::end(tasks));
     }
+
+    /**
+     * @brief range overload for parallel_for_each(iter, iter, worker, grainsize)
+     */
+    template<typename range, typename worker_predicate>
+    void parallel_for_each(range& rng, worker_predicate worker, int grainsize) {
+        parallel_for_each(boost::begin(rng), boost::end(rng), std::move(worker), grainsize);
+    }
+
+
 }
 
 
