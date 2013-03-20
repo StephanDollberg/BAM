@@ -5,14 +5,16 @@ It is thought to simplify multithreading and act as a lightweight alternative to
 
 #Example
 
-    #include "bam/parallel_for_each.hpp"
+    #include <bam/parallel_for_each.hpp>
+    #include <boost/range/algorithm.hpp>
     #include <vector>
     #include <iterator>
 
     int main() {
         auto compute_the_answer = [] (int& x) { x = 42; };
         std::vector<int> v{1, 2, 3, 4, 5, 6};
-        bam::parallel_for_each(std::begin(v), std::end(v), compute_the_answer);
+        bam::parallel_for_each(v, compute_the_answer);
+        boost::copy(v, std::ostream_iterator<int>(std::cout, " ")); // 42 42 42 42 42 42
     }
 
 #What does it offer?
@@ -27,7 +29,9 @@ It is thought to simplify multithreading and act as a lightweight alternative to
 
 #What do I need?
 
-BAM is a header only library, all you need is the include directory and a recent compiler, like GCC 4.6.
+BAM is a header only library, all you need is the include directory and a recent compiler, like GCC 4.6. 
+
+The only third party dependency is boost.
 
 You can use the library by either dropping the include folder directly into your project tree or by including it from your compile options.
 On compiling you have to use both the -std=c++0x and -pthread option.
@@ -38,7 +42,7 @@ Tests are done using the great Catch Testing framework (https://github.com/phils
 
 #Documentation
 
-The documentation serves as a tutorial which explains all the algorithms and possibilities. It is written with Latex - again to learn the language. You can compile the .tex file to get the newest version.
+The documentation serves as a tutorial which explains all the algorithms and possibilities. It is written with Latex - again to learn the language. You can compile the .tex file to get the newest version. Simply install a full latex distribution and then run `pdflatex doc.tex` in the root folder.
 
 #Thanks
 

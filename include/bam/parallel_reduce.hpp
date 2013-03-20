@@ -12,8 +12,8 @@
 
 namespace bam {
 
-    //! parallel_reduce algorithm, which enables parallelism on reduce opeartions
     /**
+     * \brief parallel_reduce algorithm, which enables parallelism on reduce opeartions
      * \param begin begin iterator of the range to be worked on
      * \param end iterator of the range to be worked on
      * \param worker function object predicate which the threads will run to opearte on the given range
@@ -69,6 +69,9 @@ namespace bam {
         return result;
     }
 
+    /**
+     * \brief range wrapper for bam::parallel_reduce
+     */
     template<typename range, typename worker_predicate, typename joiner_predicate>
     auto parallel_reduce(range& rng, worker_predicate worker, joiner_predicate joiner, int grainsize = 0) -> 
         typename std::result_of<joiner_predicate(

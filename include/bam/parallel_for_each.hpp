@@ -42,8 +42,8 @@ namespace bam {
         detail::get_tasks(std::begin(tasks), std::end(tasks));
     }
 
-    //! parallel_for algorithm, replacing serial std::for_each loops
     /**
+     * \brief parallel_for algorithm, replacing serial std::for_each loops
      * \param begin begin iterator of the range to be worked on
      * \param end end iterator of the range to be worked on
      * \param worker function object predicate which the threads will run to operate on the given range
@@ -58,7 +58,7 @@ namespace bam {
      * @brief range wrapper for bam::parallel_for_each
      */
     template<typename range, typename worker_predicate>
-    void parallel_for_each(range& rng, worker_predicate worker, int grainsize = 0) {
+    void parallel_for_each(range&& rng, worker_predicate worker, int grainsize = 0) {
         parallel_for_each_impl(boost::begin(rng), boost::end(rng), std::move(worker), grainsize);
     }
 }
