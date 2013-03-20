@@ -1,0 +1,7 @@
+.*
+makefile
+*.swp
+main
+session
+html/
+latex/
