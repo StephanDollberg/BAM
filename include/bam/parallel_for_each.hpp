@@ -21,7 +21,7 @@ namespace bam {
      * \param grainsize defines the grainsize, default argument of 0 means that grainsize will be determined on runtime
      */
     template<typename ra_iter, typename worker_predicate>
-    void parallel_for_each(ra_iter begin, ra_iter end, worker_predicate worker, int grainsize = 0) {
+    void parallel_for_each_impl(ra_iter begin, ra_iter end, worker_predicate worker, int grainsize) {
 
         // get params work_piece_per_thread and grainsize
         auto work_piece_per_thread = 0;
@@ -49,15 +49,15 @@ namespace bam {
         detail::get_tasks(std::begin(tasks), std::end(tasks));
     }
 
-    /**
-     * @brief range overload for parallel_for_each(iter, iter, worker, grainsize)
-     */
-    template<typename range, typename worker_predicate>
-    void parallel_for_each(range& rng, worker_predicate worker, int grainsize) {
-        parallel_for_each(boost::begin(rng), boost::end(rng), std::move(worker), grainsize);
+    template<typename ra_iter, typename worker_predicate>
+    void parallel_for_each(ra_iter begin, ra_iter end, worker_predicate worker, int grainsize = 0) {
+        parallel_for_each_impl(begin, end, std::move(worker), grainsize);
     }
 
-
+    template<typename range, typename worker_predicate>
+    void parallel_for_each(range& rng, worker_predicate worker, int grainsize = 0) {
+        parallel_for_each_impl(boost::begin(rng), boost::end(rng), std::move(worker), grainsize);
+    }
 }
 
 
