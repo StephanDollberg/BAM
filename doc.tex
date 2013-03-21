@@ -47,7 +47,14 @@ BAM is thought to be a simple replacement for TBB or PPL. It embodies the same s
 
 \section{parallel constructs}
 bam::parallel constructs offer simplistic parallel replacements for standard library algorithms like \textsc{std::for\_each}.
-\\\\All Parallel-Algorithms share a typical interface. They all take a range, a worker function and a grainsize parameter. 
+\\\\All Parallel-Algorithms share a typical interface. They all take a range, a worker function and a grainsize parameter. As of version 0.1.1 you can pass that range directly as a range object which supports \texttt{begin} and \texttt{end} member functions or as a pair of iterators.
+
+\begin{lstlisting}
+    std::vector<int> v{ make_data() };
+    bam::parallel_for_each(v, some_worker); // boost range style(v.0.1.1)
+    bam::parallel_for_each(v.begin(), v.end(), some_worker);
+\end{lstlisting}
+
 Work is split into pieces and worked on by a limited count of threads which is determined on runtime. Task stealing is performed when a thread runs out of work. When no grainsize parameter is passed, the default value is 0, which means that implementation will choose a grainsize on runtime.
 
 \subsection{parallel\_for}
@@ -133,7 +140,7 @@ The interface is quite big but mighty, the following examples will explain diffe
   container v = {1, 2, 3, 4, 5, 6};
 
   using namespace std::placeholders;
-  std::function<int(iter, iter)> accumulate_wrapper = 
+  auto accumulate_wrapper = 
      std::bind(std::accumulate<iter, int>, _1, _2, 0);
 
   int result = bam::parallel_reduce(std::begin(v), std::end(v), accumulate_wrapper, std::plus<int>());
