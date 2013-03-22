@@ -32,7 +32,7 @@ It is thought to simplify multithreading and act as a lightweight alternative to
 BAM is a header only library, all you need is the include directory and a recent compiler, like GCC 4.6. 
 
 The only third party dependency is boost. Lowest known working version is 1.50. Older versions should work without a problem though.
-This dependency was first added in version 0.1.1, which means that if you don't have boost you can use all versions till 0.1.0.
+This dependency was first added in version 0.2.0, which means that if you don't have boost you can use all versions till 0.1.0.
 
 You can use the library by either dropping the include folder directly into your project tree or by including it from your compile options.
 On compiling you have to use both the -std=c++0x and -pthread option.

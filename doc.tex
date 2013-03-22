@@ -47,11 +47,11 @@ BAM is thought to be a simple replacement for TBB or PPL. It embodies the same s
 
 \section{parallel constructs}
 bam::parallel constructs offer simplistic parallel replacements for standard library algorithms like \textsc{std::for\_each}.
-\\\\All Parallel-Algorithms share a typical interface. They all take a range, a worker function and a grainsize parameter. As of version 0.1.1 you can pass that range directly as a range object which supports \texttt{begin} and \texttt{end} member functions or as a pair of iterators.
+\\\\All Parallel-Algorithms share a typical interface. They all take a range, a worker function and a grainsize parameter. As of version 0.2.0 you can pass that range directly as a range object which supports \texttt{begin} and \texttt{end} member functions or as a pair of iterators.
 
 \begin{lstlisting}
     std::vector<int> v{ make_data() };
-    bam::parallel_for_each(v, some_worker); // boost range style(v.0.1.1)
+    bam::parallel_for_each(v, some_worker); // boost range style(v.0.2.0)
     bam::parallel_for_each(v.begin(), v.end(), some_worker);
 \end{lstlisting}
 
