@@ -32,7 +32,7 @@ TEST_CASE("parallel_for_each/5", "test exception in worker function") {
   std::vector<int> v(10, 1);
   typedef std::vector<int>::iterator iter;
   auto worker = [] (iter::value_type x) { if(x == 1) throw std::runtime_error("testing exception"); };
-  CHECK_THROWS_AS(bam::parallel_for_each(std::begin(v), std::end(v), worker), std::runtime_error);
+  CHECK_THROWS_AS(bam::parallel_for_each(std::begin(v), std::end(v), worker), std::exception&);
 }
 
 TEST_CASE("parallel_for_each/6", "testing range overloads") {

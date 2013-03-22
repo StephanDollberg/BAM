@@ -10,6 +10,10 @@
 #include <iterator>
 #include <algorithm>
 
+#ifdef BAM_USE_TBB
+#include <tbb/parallel_for_each.h>
+#endif
+
 namespace bam {
 
 
@@ -35,10 +39,10 @@ namespace bam {
             }
         };
 
-        // spawn tasks
+        //// spawn tasks
         auto tasks = detail::spawn_tasks(std::begin(work), std::end(work), work_helper);
 
-        // get tasks & rethrow exceptions
+        //// get tasks & rethrow exceptions
         detail::get_tasks(std::begin(tasks), std::end(tasks));
     }
 
@@ -51,7 +55,11 @@ namespace bam {
      */
     template<typename ra_iter, typename worker_predicate>
     void parallel_for_each(ra_iter begin, ra_iter end, worker_predicate worker, int grainsize = 0) {
+#ifdef BAM_USE_TBB
+        tbb::parallel_for_each(begin, end, std::move(worker));
+#else
         parallel_for_each_impl(begin, end, std::move(worker), grainsize);
+#endif
     }
 
     /**
@@ -59,7 +67,7 @@ namespace bam {
      */
     template<typename range, typename worker_predicate>
     void parallel_for_each(range&& rng, worker_predicate worker, int grainsize = 0) {
-        parallel_for_each_impl(boost::begin(rng), boost::end(rng), std::move(worker), grainsize);
+        parallel_for_each(boost::begin(rng), boost::end(rng), std::move(worker), grainsize);
     }
 }
 

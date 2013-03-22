@@ -60,7 +60,7 @@ TEST_CASE("parallel_for/6", "parallel_for excep from worker thread") {
       throw std::runtime_error("testing exception");
   }
   };
-  CHECK_THROWS_AS(bam::parallel_for(std::begin(v), std::end(v), worker), std::runtime_error);
+  CHECK_THROWS_AS(bam::parallel_for(std::begin(v), std::end(v), worker), std::exception&);
 }
 
 TEST_CASE("parallel_for/7", "testing parallel_for range overloads") {
