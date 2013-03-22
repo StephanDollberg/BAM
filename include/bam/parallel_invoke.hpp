@@ -9,29 +9,26 @@
 #include <future>
 
 namespace bam {
-
-/**
- * @brief invokes n functions in parallel; simple wrapper around some std::asyncs
- * @tparam Fs variadic template param
- * @param fs variadic function param, each representing a function
- */
-template<typename ... Fs>
-void parallel_invoke(Fs ...fs) {
-
-  std::vector<std::function<void()>> v_foos { fs ... };
-
-  std::vector<std::future<void>> temp_futs;
-
-  for(auto&& i : v_foos) {
-    temp_futs.push_back(std::async(std::launch::async, i));
-  }
-
-  for(auto&& i : temp_futs) {
-  	i.get();
-  }
-
-}
-
+    /**
+     * @brief invokes n functions in parallel; simple wrapper around some std::asyncs
+     * @tparam Fs variadic template param
+     * @param fs variadic function param, each representing a function
+     */
+    template<typename ... Fs>
+    void parallel_invoke(Fs ...fs) {
+    
+        std::vector<std::function<void()>> v_foos { fs ... };
+  
+        std::vector<std::future<void>> temp_futs;
+  
+        for(auto&& i : v_foos) {
+            temp_futs.push_back(std::async(std::launch::async, i));
+        }
+  
+        for(auto&& i : temp_futs) {
+            i.get();
+        }
+    }
 }
 
 

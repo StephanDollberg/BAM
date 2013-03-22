@@ -13,29 +13,29 @@
 
 namespace bam { namespace detail {
 
-template<typename resolution>
-class benchsuite {
-public:
+    template<typename resolution>
+    class benchsuite {
+    public:
 
-  template<typename function, typename... Args>
-  void add(std::string desc, function&& foo, Args&&... args) {
-    auto new_task = std::bind(std::forward<function>(foo), std::forward<Args>(args)...);
-    functions.push_back(std::make_pair(desc, std::move(new_task)));
-  }
+        template<typename function, typename... Args>
+        void add(std::string desc, function&& foo, Args&&... args) {
+            auto new_task = std::bind(std::forward<function>(foo), std::forward<Args>(args)...);
+            functions.push_back(std::make_pair(desc, std::move(new_task)));
+        }
+  
+        void run() {
+            for(auto& i : functions) {
+                bam::timer<resolution> t;
+                i.second();
+                std::cout << i.first << " took " << t.elapsed() << " time" << std::endl;
+            }
+    
+            functions.clear();
+        }
 
-  void run() {
-    for(auto& i : functions) {
-      bam::timer<resolution> t;
-      i.second();
-      std::cout << i.first << " took " << t.elapsed() << " time" << std::endl;
-    }
-
-    functions.clear();
-  }
-
-private:
-  std::vector<std::pair<std::string, std::function<void()> > > functions;
-};
+    private:
+        std::vector<std::pair<std::string, std::function<void()> > > functions;
+    };
 
 }}
 

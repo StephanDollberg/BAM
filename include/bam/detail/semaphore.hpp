@@ -11,55 +11,53 @@
 
 namespace bam { namespace detail {
 
-/**
- * @brief basic semaphore, used as a non-busy signalling system in task_pool
- */
-class semaphore {
-public:
+    /**
+     * @brief basic semaphore, used as a non-busy signalling system in task_pool
+     */
+    class semaphore {
+    public:
 
-  /**
-   * @brief creates semaphore with a default counter of 0
-   */
-  semaphore() : counter(0) {}
+        /**
+         * @brief creates semaphore with a default counter of 0
+         */
+        semaphore() : counter(0) {}
+  
+        /**
+         * @brief creates semaphore with a given start counter
+         * @param start_counter initial counter value
+         */
+        semaphore(int start_counter) : counter(start_counter) {
+            assert(start_counter >= 0);
+        }
+  
+        /**
+         * @brief raises counter and notifies one waiting thread
+         */
+        void post() {
+            std::unique_lock<std::mutex> lock(mutex);
+            ++counter;
+            lock.unlock();
+            cond_var.notify_one();
+        }
+  
+        /**
+         * @brief decreases counter, blocks if counter is zero
+         */
+        void wait() {
+            std::unique_lock<std::mutex> lock(mutex);
+    
+            auto predicate = [&] () { return counter; };
+    
+            cond_var.wait(lock, predicate);
+    
+            --counter;
+        }
 
-  /**
-   * @brief creates semaphore with a given start counter
-   * @param start_counter initial counter value
-   */
-  semaphore(int start_counter) : counter(start_counter) {
-    assert(start_counter >= 0);
-  }
-
-  /**
-   * @brief raises counter and notifies one waiting thread
-   */
-  void post() {
-    std::unique_lock<std::mutex> lock(mutex);
-    ++counter;
-    lock.unlock();
-    cond_var.notify_one();
-  }
-
-  /**
-   * @brief decreases counter, blocks if counter is zero
-   */
-  void wait() {
-    std::unique_lock<std::mutex> lock(mutex);
-
-    auto predicate = [&] () { return counter; };
-
-    cond_var.wait(lock, predicate);
-
-    --counter;
-  }
-
-private:
-  std::condition_variable cond_var;
-  std::mutex mutex;
-  int counter;
-};
-
-
+    private:
+        std::condition_variable cond_var;
+        std::mutex mutex;
+        int counter;
+    };
 } }
 
 
