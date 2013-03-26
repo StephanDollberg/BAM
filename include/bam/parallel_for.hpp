@@ -67,8 +67,8 @@ namespace bam {
      * \brief range wrapper for bam::parallel_for
      */
     template<typename range, typename worker_predicate>
-    void parallel_for(const range& rng, worker_predicate worker, int grainsize = 0) {
-        parallel_for(*boost::begin(rng), *boost::end(rng), std::move(worker), grainsize);
+    void parallel_for(range&& rng, worker_predicate worker, int grainsize = 0) {
+        parallel_for(boost::begin(rng), boost::end(rng), std::move(worker), grainsize);
     }
 }
 

@@ -65,18 +65,25 @@ TEST_CASE("parallel_for/6", "parallel_for excep from worker thread") {
 
 TEST_CASE("parallel_for/7", "testing parallel_for range overloads") {
     std::vector<int> v{0, 0, 0, 0, 0, 0};
-    auto worker = [&] (int b, int e) {
+    typedef std::vector<int>::iterator iter;
+
+    auto worker_int = [&] (int b, int e) {
         for(int i = b; i != e; ++i) {
             v[i] += 1;
         }
     };
-    bam::parallel_for(boost::irange(0,6), worker);
+
+    auto worker_iter = [&] (iter b, iter e) {
+        std::for_each(b, e, [&] (int& x) { x += 1; });
+    };
+
+    bam::parallel_for(v, worker_iter);
     CHECK(std::accumulate(v.begin(), v.end(), 0) == 1 * static_cast<int>(v.size()));
-    bam::parallel_for(boost::irange(0,6), worker, 1);
+    bam::parallel_for(v, worker_iter, 1);
     CHECK(std::accumulate(v.begin(), v.end(), 0) == 2 * static_cast<int>(v.size()));
-    bam::parallel_for(0, 6, worker);
+    bam::parallel_for(0, 6, worker_int);
     CHECK(std::accumulate(v.begin(), v.end(), 0) == 3 * static_cast<int>(v.size()));
-    bam::parallel_for(0, 6, worker, 1);
+    bam::parallel_for(0, 6, worker_int, 1);
     CHECK(std::accumulate(v.begin(), v.end(), 0) == 4 * static_cast<int>(v.size()));
 }
 
