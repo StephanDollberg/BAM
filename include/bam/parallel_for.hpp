@@ -53,14 +53,7 @@ namespace bam {
      */
     template<typename ra_iter, typename worker_predicate>
     void parallel_for(ra_iter begin, ra_iter end, worker_predicate worker, int grainsize = 0) {
-#ifdef BAM_USE_TBB
-        auto worker_wrapper = [&] (const tbb::blocked_range<ra_iter>& rng) {
-            worker(rng.begin(), rng.end());
-        };
-        tbb::parallel_for(tbb::blocked_range<ra_iter>(begin, end, grainsize), std::move(worker_wrapper));
-#else
         parallel_for_impl(begin, end, std::move(worker), grainsize);
-#endif
     }
 
     /**
