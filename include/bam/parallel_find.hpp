@@ -46,9 +46,9 @@ namespace bam {
         auto work = detail::make_work(begin, end, work_piece_per_thread, grainsize);
 
         // helper function which the threads will run
-        auto work_helper = [&] (typename decltype(work)::iterator thread_iter) {
+        auto work_helper = [&] (detail::work_range<Iter>& work_rng) {
             std::pair<Iter, Iter> work_chunk;
-            while(!done && thread_iter->try_fetch_work(work_chunk, work)) {
+            while(!done && work_rng.try_fetch_work(work_chunk, work)) {
                 auto found_iter = boost::find(work_chunk, val);
                 if(found_iter != work_chunk.second) {
                     done = true;
@@ -60,7 +60,7 @@ namespace bam {
         };
 
         // spawn tasks
-        auto tasks = detail::spawn_tasks(std::begin(work), std::end(work), work_helper);
+        auto tasks = detail::spawn_tasks(work, work_helper);
 
         // get tasks & rethrow
         return detail::join_iter(tasks, end);
