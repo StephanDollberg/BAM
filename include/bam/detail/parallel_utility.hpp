@@ -94,22 +94,22 @@ namespace bam { namespace detail {
         return work;
     }
 
-    template<typename work_iter, typename worker_foo>
-    auto spawn_tasks(work_iter begin, work_iter end, worker_foo&& foo) 
-      -> std::vector<std::future<typename std::result_of<worker_foo(work_iter)>::type>>
+    template<typename Work, typename worker_foo>
+    auto spawn_tasks(Work& work, worker_foo&& foo) 
+      -> std::vector<std::future<typename std::result_of<worker_foo(typename Work::value_type&)>::type>>
     {
-        std::vector<std::future<typename std::result_of<worker_foo(work_iter)>::type>> threads;
-        for(auto it = begin; it != end; ++it) {
-            threads.emplace_back(std::async(std::launch::async, foo, it));
+        std::vector<std::future<typename std::result_of<worker_foo(typename Work::value_type&)>::type>> threads;
+        for(auto&& w : work) {
+            threads.emplace_back(std::async(std::launch::async, foo, std::ref(w)));
         }
 
         return threads;
     }
 
-    template<typename iter>
-    void get_tasks(iter begin, iter end) {
-        for(auto it = begin; it != end; ++it) {
-            it->get();
+    template<typename Tasks>
+    void get_tasks(Tasks& tasks) {
+        for(auto&& task : tasks) {
+            task.get();
         }
     }
 

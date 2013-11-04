@@ -18,8 +18,7 @@ namespace bam { namespace detail {
     class work_range {
     public:
         work_range(ra_iter begin_, ra_iter end_, unsigned grainsize_) : iter(begin_), end(end_), grainsize(grainsize_)  {}
-  
-  
+
         /**
          * @brief try_fetch_work tries to fetch work
          * @param chunk work chunk to fill with work

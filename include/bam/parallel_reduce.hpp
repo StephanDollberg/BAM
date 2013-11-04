@@ -41,15 +41,15 @@ namespace bam {
         auto work = detail::make_work(begin, end, work_piece_per_thread, grainsize);
   
         // helper function
-        auto work_helper = [&] (typename decltype(work)::iterator thread_iter) -> return_type {
+        auto work_helper = [&] (detail::work_range<ra_iter>& work_rng) -> return_type {
             return_type ret = return_type();
             std::pair<ra_iter, ra_iter> work_chunk;
     
-            if(thread_iter->try_fetch_work(work_chunk, work)) { // first run initializes ret
+            if(work_rng.try_fetch_work(work_chunk, work)) { // first run initializes ret
               ret = worker(work_chunk.first, work_chunk.second);
             }
     
-            while(thread_iter->try_fetch_work(work_chunk, work)) {
+            while(work_rng.try_fetch_work(work_chunk, work)) {
               auto result = worker(work_chunk.first, work_chunk.second);
               ret = joiner(ret, result);
             }
@@ -58,7 +58,7 @@ namespace bam {
         };
   
         // start runner tasks
-        auto threads = detail::spawn_tasks(std::begin(work), std::end(work), work_helper);
+        auto threads = detail::spawn_tasks(work, work_helper);
   
         // join results
         auto result = std::begin(threads)->get();

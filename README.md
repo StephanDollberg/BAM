@@ -1,7 +1,7 @@
 #What is BAM?
 
 BAM is a small library which offers parallel constructs like parallel_for, parallel_reduce or a task-pool.
-It is thought to simplify multithreading and act as a lightweight alternative to TBB/(PPL). 
+It is thought to simplify multithreading and act as a lightweight alternative to TBB/(PPL).
 
 #Example
 
@@ -29,7 +29,7 @@ It is thought to simplify multithreading and act as a lightweight alternative to
 
 #What do I need?
 
-BAM is a header only library, all you need is the include directory and a recent compiler, like GCC 4.6. 
+BAM is a header only library, all you need is the include directory and a recent compiler, like GCC 4.7 or clang 3.3.
 
 The only third party dependency is boost. Lowest known working version is 1.50. Older versions should work without a problem though.
 This dependency was first added in version 0.2.0, which means that if you don't have boost you can use all versions till 0.1.0.

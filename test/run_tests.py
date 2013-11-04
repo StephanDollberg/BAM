@@ -52,14 +52,17 @@ def make_error_flags():
     return ['-Wall', '-W', '-Wextra', '-pedantic-errors']
 
 # creates compile options like -o etc
-def make_compile(files):
+def make_compile(files, args):
     if len(files) == 0:
         files = get_all_files()
     else:
         files = prepare_files(files)
 
+    if 'DBAM_USE_TBB' in args:
+        files.append('-ltbb')
+
     name = make_name()
-    return ['-o', name, 'test_runner.cpp'] + files
+    return ['-o', name, 'test_runner.cpp'] + files 
 
 # creates additional defines
 def make_defines():
@@ -80,7 +83,7 @@ def make_optimization():
 
 # combines all options
 def make_compile_options(args):
-    return make_compiler(args) + make_standard_flags(args) + make_error_flags() + make_extra_flags(args) + make_defines() + make_optimization() + make_compile(args.files)
+    return make_compiler(args) + make_standard_flags(args) + make_error_flags() + make_extra_flags(args) + make_defines() + make_optimization() + make_compile(args.files, args.args)
 
 # actual main function, creates compile args and then compiles and runs
 def main():
