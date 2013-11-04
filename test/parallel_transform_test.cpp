@@ -15,9 +15,16 @@ TEST_CASE("parallel_transform/2", "parallel_transform on one element range") {
     CHECK(std::accumulate(std::begin(v), std::end(v), 0) == 2 * static_cast<int>(v.size()));
 }
 
-TEST_CASE("parallel_transform/3", "parallel_transform on zero X element range") {
+TEST_CASE("parallel_transform/3", "parallel_transform on X element range") {
     std::vector<int> v(6, 1);
     auto foo = [] (int x) { return x + 1; };
     bam::parallel_transform(v.begin(), v.end(), v.begin(), foo);
+    CHECK(std::accumulate(std::begin(v), std::end(v), 0) == 2 * static_cast<int>(v.size()));
+}
+
+TEST_CASE("parallel_transform/4", "parallel_transform on X element range; ranged version") {
+    std::vector<int> v(6, 1);
+    auto foo = [] (int x) { return x + 1; };
+    bam::parallel_transform(v, v.begin(), foo);
     CHECK(std::accumulate(std::begin(v), std::end(v), 0) == 2 * static_cast<int>(v.size()));
 }

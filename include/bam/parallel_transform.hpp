@@ -8,9 +8,9 @@
 #include "parallel_for_each.hpp"
 
 #include <boost/iterator/zip_iterator.hpp>
+#include <boost/range.hpp>
 
-
-#include <numeric>
+#include <iterator>
 
 namespace bam {
     template<typename in_iter, typename out_iter, typename Worker>
@@ -27,7 +27,11 @@ namespace bam {
             out_first + std::distance(input_first, input_end)));
 
         bam::parallel_for_each(begin, end, helper, grainsize);
+    }
 
+    template<typename in_range, typename out_iter, typename Worker>
+    void parallel_transform(in_range&& input_range, out_iter out_first, Worker worker) {
+        bam::parallel_transform(boost::begin(input_range), boost::end(input_range), out_first, std::move(worker));
     }
 }
 
