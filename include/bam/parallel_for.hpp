@@ -30,7 +30,7 @@ namespace bam {
         auto work = detail::make_work(begin, end, work_piece_per_thread, grainsize);
 
         // helper function which the threads will run
-        auto work_helper = [&] (detail::work_range<ra_iter>& work_rng) {
+        auto work_helper = [&work, worker] (detail::work_range<ra_iter>& work_rng) {
             std::pair<ra_iter, ra_iter> work_chunk;
             while(work_rng.try_fetch_work(work_chunk, work)) {
                 worker(work_chunk.first, work_chunk.second);

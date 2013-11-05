@@ -18,7 +18,7 @@ namespace bam {
         using in_type = typename std::iterator_traits<in_iter>::value_type;
         using out_type = typename std::iterator_traits<out_iter>::value_type;
 
-        auto helper = [&] (boost::tuple<in_type, out_type&> t) {
+        auto helper = [=] (boost::tuple<in_type, out_type&> t) {
             boost::get<1>(t) = worker(boost::get<0>(t));
         };
 

@@ -24,48 +24,48 @@ namespace bam {
     auto parallel_reduce(ra_iter begin, ra_iter end, worker_predicate worker, join_predicate joiner, int grainsize = 0) ->
       typename std::result_of<
           join_predicate(typename std::result_of<worker_predicate(ra_iter, ra_iter)>::type, typename std::result_of<worker_predicate(ra_iter, ra_iter)>::type)
-        >::type 
+        >::type
     {
         typedef typename std::result_of<worker_predicate(ra_iter, ra_iter)>::type worker_return_type;
         typedef typename std::result_of<join_predicate(worker_return_type, worker_return_type)>::type return_type;
-  
+
         // get params work_piece_per_thread and grainsize
         auto work_piece_per_thread = 0;
         std::tie(grainsize, work_piece_per_thread) = detail::get_scheduler_params(end - begin, grainsize);
-  
+
         if(work_piece_per_thread == 0) {
             return worker(begin, end);
         }
-  
+
         // create work
         auto work = detail::make_work(begin, end, work_piece_per_thread, grainsize);
-  
+
         // helper function
-        auto work_helper = [&] (detail::work_range<ra_iter>& work_rng) -> return_type {
+        auto work_helper = [&work, worker, joiner] (detail::work_range<ra_iter>& work_rng) -> return_type {
             return_type ret = return_type();
             std::pair<ra_iter, ra_iter> work_chunk;
-    
+
             if(work_rng.try_fetch_work(work_chunk, work)) { // first run initializes ret
               ret = worker(work_chunk.first, work_chunk.second);
             }
-    
+
             while(work_rng.try_fetch_work(work_chunk, work)) {
               auto result = worker(work_chunk.first, work_chunk.second);
               ret = joiner(ret, result);
             }
-    
+
             return ret;
         };
-  
+
         // start runner tasks
         auto threads = detail::spawn_tasks(work, work_helper);
-  
+
         // join results
         auto result = std::begin(threads)->get();
         for(auto it = std::begin(threads) + 1; it != std::end(threads); ++it) {
             result = joiner(result, it->get());
         }
-  
+
         return result;
     }
 
@@ -73,9 +73,9 @@ namespace bam {
      * \brief range wrapper for bam::parallel_reduce
      */
     template<typename range, typename worker_predicate, typename joiner_predicate>
-    auto parallel_reduce(range& rng, worker_predicate worker, joiner_predicate joiner, int grainsize = 0) -> 
+    auto parallel_reduce(range& rng, worker_predicate worker, joiner_predicate joiner, int grainsize = 0) ->
         typename std::result_of<joiner_predicate(
-                    typename std::result_of<worker_predicate(typename range::iterator, typename range::iterator)>::type, 
+                    typename std::result_of<worker_predicate(typename range::iterator, typename range::iterator)>::type,
                     typename std::result_of<worker_predicate(typename range::iterator, typename range::iterator)>::type
                 )>::type
     {
