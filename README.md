@@ -22,10 +22,13 @@ It is thought to simplify multithreading and act as a lightweight alternative to
  - parallel_for
  - parallel_for_each
  - parallel_reduce
+ - parallel_transform
  - improved version of std::async
  - task_pool
  - timer
  - parallel_invoke
+ - parallel_find
+ - parallel_copy
 
 #What do I need?
 
