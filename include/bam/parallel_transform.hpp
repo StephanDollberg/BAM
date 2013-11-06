@@ -13,6 +13,15 @@
 #include <iterator>
 
 namespace bam {
+
+    /**
+     * \brief parallel_transform algorithm, replacing serial std::transform
+     * \param input_begin begin iterator of the range to be worked on
+     * \param input_end end iterator of the range to be worked on
+     * \param out_first begin iterator of the range where the mapped values will be written to
+     * \param worker function object predicate which the threads will run to operate on the given range
+     * \param grainsize defines the grainsize, default argument of 0 means that grainsize will be determined on runtime
+     */
     template<typename in_iter, typename out_iter, typename Worker>
     void parallel_transform(in_iter input_first, in_iter input_end, out_iter out_first, Worker worker, int grainsize = 0) {
         using in_type = typename std::iterator_traits<in_iter>::value_type;
@@ -29,6 +38,9 @@ namespace bam {
         bam::parallel_for_each(begin, end, helper, grainsize);
     }
 
+    /**
+     * @brief range wrapper for bam::parallel_transform
+     */
     template<typename in_range, typename out_iter, typename Worker>
     void parallel_transform(in_range&& input_range, out_iter out_first, Worker worker) {
         bam::parallel_transform(boost::begin(input_range), boost::end(input_range), out_first, std::move(worker));

@@ -10,6 +10,12 @@
 #include <iterator>
 
 namespace bam {
+    /**
+     * \brief parallel_copy algorithm, replacing serial std::copy
+     * \param begin begin iterator of the range to be worked on
+     * \param end end iterator of the range to be worked on
+     * \param dest begin iterator of the range where the values will be copied to
+     */
     template<typename InputIterator, typename OutputIterator>
     void parallel_copy(InputIterator begin, InputIterator end, OutputIterator dest) {
         auto helper = [=] (InputIterator b, InputIterator e) {
@@ -19,6 +25,9 @@ namespace bam {
         parallel_for(begin, end, helper);
     }
 
+    /**
+     * @brief range wrapper for bam::parallel_transform
+     */
     template<typename Range, typename Oiter>
     void parallel_copy(const Range& rng, Oiter target) {
         parallel_copy(boost::begin(rng), boost::end(rng), target);
