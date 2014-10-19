@@ -1,6 +1,8 @@
 #include "catch.hpp"
 #include "../include/bam/parallel_transform.hpp"
 
+#include <numeric>
+
 TEST_CASE("parallel_transform/1", "parallel_transform on zero range") {
     std::vector<int> v(0, 1);
     auto foo = [] (int x) { return x + 1; };

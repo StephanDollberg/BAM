@@ -1,6 +1,8 @@
 #include "../include/bam/parallel_invoke.hpp"
 #include "catch.hpp"
 
+#include <numeric>
+
 TEST_CASE("parallel_invoke/1", "testing 3 functions") {
   std::vector<int> v { 1, 2, 3 };
   auto foo1 = [&] () { v[0] *= 2; };
