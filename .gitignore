@@ -5,3 +5,5 @@ main
 session
 html/
 latex/
+build/
+cmake-build-debug/
